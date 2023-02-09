@@ -1,41 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
+import QrLogin from "./QrLogin";
 
 const Login = () => {
+  const [tab, setTab] = useState("qr");
   return (
     <div className="flex w-full justify-center items-center h-full">
       <div
         className="flex justify-center mt-10 flex-col gap-y-3 px-4 w-full"
         style={{ maxWidth: "1000px" }}
       >
-        <div className="flex w-1/2">
-          <span>QR로그인</span>
+        <div className="flex w-full h-full justify-center items-start align-top flex-col gap-y-3 bg-slate-100">
+          <div className="flex w-full h-12 bg-white">
+            <div
+              className={`flex w-1/2 h-full justify-center items-center ${
+                tab === "qr" && "border-b-2 border-orange-500"
+              } hover:cursor-pointer`}
+              onClick={() => setTab((prev) => (prev = "qr"))}
+            >
+              QR로그인
+            </div>
+            <div
+              className={`flex w-1/2 h-full  justify-center items-center ${
+                tab === "local" && "border-b-2 border-orange-500"
+              }  hover:cursor-pointer`}
+              onClick={() => setTab((prev) => (prev = "local"))}
+            >
+              휴대전화번호 로그인
+            </div>
+          </div>
         </div>
-        <div className="flex w-1/2">
-          <span>QR로그인</span>
+        {/* 로그인탭시작 */}
+        <div className="w-full h-full justify-center items-center">
+          <QrLogin />
         </div>
-        <div className="flex justify-center">
-          <p className="text-gray-800">이메일 아이디로 로그인</p>
-        </div>
-        <div className="flex justify-center">
-          <input
-            type="text"
-            className="w-full h-12 rounded-md focus:ring-0 focus:outline-orange-400 border border-gray-400 px-5 font-light"
-            placeholder="이메일"
-          />
-        </div>
-        <div className="flex justify-center">
-          <input
-            type="password"
-            className="w-full h-12 rounded-md focus:ring-0 focus:outline-orange-400 border border-gray-400 px-5 font-light"
-            placeholder="비밀번호"
-          />
-        </div>
-        <button
-          className="w-full h-12 bg-orange-500 rounded-md border-gray-300 border"
-          onClick={() => (window.location.href = "/home")}
-        >
-          <span className=" text-base font-medium text-white">로그인</span>
-        </button>
+        {/* 로그인탭끝 */}
       </div>
     </div>
   );
