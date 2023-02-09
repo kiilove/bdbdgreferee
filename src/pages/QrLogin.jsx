@@ -1,26 +1,38 @@
+import { getAllByPlaceholderText } from "@testing-library/react";
 import React, { useEffect, useState } from "react";
-import QrReader from "react-qr-reader";
+import { QrReader } from "react-qr-reader";
 
 const QrLogin = () => {
-  const [selected, setSelected] = useState("environment");
+  const [selected, setSelected] = useState(true);
   const [startScan, setStartScan] = useState(false);
   const [loadingScan, setLoadingScan] = useState(false);
-  const [data, setData] = useState("");
+  const [data, setData] = useState("No result");
+  const [uid, setUid] = useState();
+  const [loginTime, setLoginTime] = useState();
 
-  const handleScan = async (scanData) => {
-    setLoadingScan(true);
-    console.log(`loaded data data`, scanData);
-    if (scanData && scanData !== "") {
-      console.log(`loaded >>>`, scanData);
-      setData(scanData);
-      setStartScan(false);
-      setLoadingScan(false);
-      // setPrecScan(scanData);
+  useEffect(() => {
+    if (!!data) {
+      //setUid((prev) => (prev = data?.text));
+      const tryTime = new Date(data.timestamp);
+
+      const calDate =
+        tryTime.getFullYear().toString() +
+        "-" +
+        (tryTime.getMonth() + 1) +
+        "-" +
+        tryTime.getDate().toString() +
+        " " +
+        tryTime.getHours().toString() +
+        ":" +
+        tryTime.getMinutes().toString() +
+        ":" +
+        tryTime.getSeconds().toString();
+      //console.log(calDate);
+      setLoginTime(
+        (prev) => (prev = { timestamp: data.timestamp, calDate: calDate })
+      );
     }
-  };
-  const handleError = (err) => {
-    console.error(err);
-  };
+  }, [data]);
 
   return (
     <div className="flex w-full h-screen justify-center items-center">
@@ -39,28 +51,28 @@ const QrLogin = () => {
         {startScan && (
           <div className="flex flex-col w-full h-full gap-y-2 justify-center items-center mt-2">
             <div className="flex">
-              <select
-                onChange={(e) => setSelected(e.target.value)}
-                className="w-40 h-10 border-2 border-orange-500 flex justify-center items-center"
-              >
-                <option value={"user"}>정상</option>
-                <option value={"environment"}>반전</option>
-              </select>
+              <button onClick={() => setSelected(!selected)}>전환</button>
             </div>
-            <div className="flex w-full h-full flex-col justify-start items-center">
+            <div className="flex w-full h-full justify-center items-top">
               <QrReader
-                facingMode={selected}
-                delay={1000}
-                onError={handleError}
-                onScan={handleScan}
-                resolution={2000}
-                style={{ width: "80%", height: "80%" }}
+                onResult={(result, error) => {
+                  if (!!result) {
+                    //setData(result?.text);
+                    setData(result);
+                  }
+                }}
+                className="w-3/4 h-3/4"
+                constraints={{ facingMode: selected ? "user" : "environment" }}
               />
             </div>
           </div>
         )}
-
-        {data !== "" && <p>{data}</p>}
+        {data && (
+          <div>
+            <p>{data.text && loginTime && data.text}</p>
+            <p>로그인시간 : {loginTime && loginTime?.calDate}</p>
+          </div>
+        )}
       </div>
     </div>
   );
