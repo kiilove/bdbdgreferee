@@ -23,34 +23,43 @@ const QrLogin = () => {
   };
 
   return (
-    <div className="flex w-full h-full justify-center items-center">
-      <div className="flex w-full h-full p-10 border-2 border-orange-500 flex-col justify-start items-center">
-        <button
-          className="w-40 h-10 bg-orange-500 text-white"
-          onClick={() => {
-            setStartScan(!startScan);
-          }}
-        >
-          {startScan ? "카메라 중지" : "카메라 작동"}
-        </button>
+    <div className="flex w-full h-screen justify-center items-center">
+      <div className="flex w-full h-full p-20 flex-col justify-start items-center">
+        <div className="flex">
+          <button
+            className="w-40 h-10 bg-orange-500 text-white"
+            onClick={() => {
+              setStartScan(!startScan);
+            }}
+          >
+            {startScan ? "카메라 중지" : "카메라 작동"}
+          </button>
+        </div>
+
         {startScan && (
-          <div className="flex w-full h-full flex-col">
-            <select onChange={(e) => setSelected(e.target.value)}>
-              <option value={"user"}>Front Camera</option>
-              <option value={"environment"}>Back Camera</option>
-            </select>
-            <div className="flex w-full h-full p-20 justify-center items-center">
+          <div className="flex flex-col w-full h-full gap-y-2 justify-center items-center mt-2">
+            <div className="flex">
+              <select
+                onChange={(e) => setSelected(e.target.value)}
+                className="w-40 h-10 border-2 border-orange-500 flex justify-center items-center"
+              >
+                <option value={"user"}>정상</option>
+                <option value={"environment"}>반전</option>
+              </select>
+            </div>
+            <div className="flex w-full h-full flex-col justify-start items-center">
               <QrReader
                 facingMode={selected}
                 delay={1000}
                 onError={handleError}
                 onScan={handleScan}
-                className="w-3/4 h-3/4"
+                resolution={2000}
+                style={{ width: "80%", height: "80%" }}
               />
             </div>
           </div>
         )}
-        {loadingScan && <p>Loading</p>}
+
         {data !== "" && <p>{data}</p>}
       </div>
     </div>
