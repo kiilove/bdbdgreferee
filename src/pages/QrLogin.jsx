@@ -8,7 +8,7 @@ const QrLogin = () => {
   const [data, setData] = useState("No result");
   const [uid, setUid] = useState();
   const [loginTime, setLoginTime] = useState();
-  const [deviceId, setDeviceId] = useState();
+  const [deviceId, setDeviceId] = useState("");
   const [devices, setDevices] = useState([]);
   const handleDevices = useCallback(
     (mediaDevices) =>
@@ -19,6 +19,10 @@ const QrLogin = () => {
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
+
+  useEffect(() => {
+    console.log(devices);
+  }, [devices]);
 
   useEffect(() => {
     if (!!data) {
@@ -42,15 +46,16 @@ const QrLogin = () => {
         (prev) => (prev = { timestamp: data.timestamp, calDate: calDate })
       );
     }
+    //console.log(data);
   }, [data]);
 
-  useEffect(() => {
-    const chkCam = navigator.mediaDevices
-      .enumerateDevices()
-      .then((item) => item.filter(({ kind }) => kind === "videoinput"));
+  // useEffect(() => {
+  //   const chkCam = navigator.mediaDevices
+  //     .enumerateDevices()
+  //     .then((item) => item.filter(({ kind }) => kind === "videoinput"));
 
-    setDevices((prev) => (prev = chkCam));
-  }, []);
+  //   setDevices((prev) => (prev = chkCam));
+  // }, []);
 
   useEffect(() => {
     console.log(deviceId);
@@ -79,7 +84,7 @@ const QrLogin = () => {
                     <p>
                       <span>{idx + 1}</span>
                       <span>:</span>
-                      {device.deviceId}
+                      {device.groupId}
                     </p>
                   </div>
                 ))}
@@ -91,9 +96,10 @@ const QrLogin = () => {
               {devices &&
                 devices.map((device, idx) => (
                   <button
+                    className="w-10 h-10 bg-orange-300 flex justify-center items-center"
                     onClick={() =>
                       device.deviceId &&
-                      setDeviceId((prev) => (prev = device.deviceId))
+                      setDeviceId((prev) => (prev = device.groupId))
                     }
                   >
                     {idx + 1}
@@ -101,34 +107,19 @@ const QrLogin = () => {
                 ))}
             </div>
             <div className="flex w-full h-full justify-center items-top">
-              {deviceId ? (
-                <QrReader
-                  videoId={deviceId}
-                  onResult={(result, error) => {
-                    if (!!result) {
-                      //setData(result?.text);
-                      setData(result);
-                    }
-                  }}
-                  className="w-3/4 h-3/4"
-                  constraints={{
-                    facingMode: selected ? "user" : "environment",
-                  }}
-                />
-              ) : (
-                <QrReader
-                  onResult={(result, error) => {
-                    if (!!result) {
-                      //setData(result?.text);
-                      setData(result);
-                    }
-                  }}
-                  className="w-3/4 h-3/4"
-                  constraints={{
-                    facingMode: selected ? "user" : "environment",
-                  }}
-                />
-              )}
+              <QrReader
+                videoId={deviceId}
+                onResult={(result, error) => {
+                  if (!!result) {
+                    //setData(result?.text);
+                    setData(result);
+                  }
+                }}
+                className="w-3/4 h-3/4"
+                constraints={{
+                  facingMode: selected ? "user" : "environment",
+                }}
+              />
             </div>
           </div>
         )}
