@@ -1,5 +1,5 @@
 import { getAllByPlaceholderText } from "@testing-library/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
 
 const QrLogin = () => {
@@ -9,6 +9,17 @@ const QrLogin = () => {
   const [data, setData] = useState("No result");
   const [uid, setUid] = useState();
   const [loginTime, setLoginTime] = useState();
+  const [deviceId, setDeviceId] = useState();
+  const [devices, setDevices] = useState([]);
+  const handleDevices = useCallback(
+    (mediaDevices) =>
+      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
+    [setDevices]
+  );
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+  }, [handleDevices]);
 
   useEffect(() => {
     if (!!data) {
@@ -34,6 +45,18 @@ const QrLogin = () => {
     }
   }, [data]);
 
+  useEffect(() => {
+    const chkCam = navigator.mediaDevices
+      .enumerateDevices()
+      .then((item) => item.filter(({ kind }) => kind === "videoinput"));
+
+    setDevices((prev) => (prev = chkCam));
+  }, []);
+
+  useEffect(() => {
+    console.log(deviceId);
+  }, [deviceId]);
+
   return (
     <div className="flex w-full h-screen justify-center items-center">
       <div className="flex w-full h-full p-20 flex-col justify-start items-center">
@@ -50,27 +73,69 @@ const QrLogin = () => {
 
         {startScan && (
           <div className="flex flex-col w-full h-full gap-y-2 justify-center items-center mt-2">
-            <div className="flex">
-              <button onClick={() => setSelected(!selected)}>전환</button>
+            <div className="flex w-full justify-center items-center flex-col">
+              {devices &&
+                devices.map((device, idx) => (
+                  <div>
+                    <p>
+                      <span>{idx + 1}</span>
+                      <span>:</span>
+                      {device.deviceId}
+                    </p>
+                  </div>
+                ))}
+            </div>
+            <div className="flex w-full justify-center items-center">
+              <button onClick={() => setSelected(!selected)}>좌우반전</button>
+            </div>
+            <div className="flex w-full justify-center items-center">
+              {devices &&
+                devices.map((device, idx) => (
+                  <button
+                    onClick={() =>
+                      device.deviceId &&
+                      setDeviceId((prev) => (prev = device.deviceId))
+                    }
+                  >
+                    {idx + 1}
+                  </button>
+                ))}
             </div>
             <div className="flex w-full h-full justify-center items-top">
-              <QrReader
-                onResult={(result, error) => {
-                  if (!!result) {
-                    //setData(result?.text);
-                    setData(result);
-                  }
-                }}
-                className="w-3/4 h-3/4"
-                constraints={{ facingMode: selected ? "user" : "environment" }}
-              />
+              {deviceId ? (
+                <QrReader
+                  videoId={deviceId}
+                  onResult={(result, error) => {
+                    if (!!result) {
+                      //setData(result?.text);
+                      setData(result);
+                    }
+                  }}
+                  className="w-3/4 h-3/4"
+                  constraints={{
+                    facingMode: selected ? "user" : "environment",
+                  }}
+                />
+              ) : (
+                <QrReader
+                  onResult={(result, error) => {
+                    if (!!result) {
+                      //setData(result?.text);
+                      setData(result);
+                    }
+                  }}
+                  className="w-3/4 h-3/4"
+                  constraints={{
+                    facingMode: selected ? "user" : "environment",
+                  }}
+                />
+              )}
             </div>
           </div>
         )}
         {data && (
           <div>
             <p>{data.text && loginTime && data.text}</p>
-            <p>로그인시간 : {loginTime && loginTime?.calDate}</p>
           </div>
         )}
       </div>
