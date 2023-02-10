@@ -1,20 +1,50 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { QrReader } from "react-qr-reader";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import QrReader from "react-qr-reader";
 
 const QrLogin = () => {
-  const [selected, setSelected] = useState(true);
+  const [selected, setSelected] = useState("environment");
   const [startScan, setStartScan] = useState(false);
   const [loadingScan, setLoadingScan] = useState(false);
-  const [data, setData] = useState("No result");
+  const [data, setData] = useState("");
   const [uid, setUid] = useState();
   const [loginTime, setLoginTime] = useState();
   const [deviceId, setDeviceId] = useState("");
   const [devices, setDevices] = useState([]);
+
+  const camRef = useRef(null);
+
+  const handleScan = async (scanData) => {
+    setLoadingScan(true);
+    console.log(`loaded data data`, scanData);
+    if (scanData && scanData !== "") {
+      console.log(`loaded >>>`, scanData);
+      setData(scanData);
+      setStartScan(false);
+      setLoadingScan(false);
+      // setPrecScan(scanData);
+    }
+  };
+  const handleError = (err) => {
+    console.error(err);
+  };
+
   const handleDevices = useCallback(
     (mediaDevices) =>
       setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
     [setDevices]
   );
+
+  const closeCam = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: true,
+    });
+    stream.getTracks().forEach(function (track) {
+      track.stop();
+      track.enabled = false;
+    });
+    camRef.current.stopCamera();
+  };
 
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
@@ -49,86 +79,61 @@ const QrLogin = () => {
     //console.log(data);
   }, [data]);
 
-  // useEffect(() => {
-  //   const chkCam = navigator.mediaDevices
-  //     .enumerateDevices()
-  //     .then((item) => item.filter(({ kind }) => kind === "videoinput"));
-
-  //   setDevices((prev) => (prev = chkCam));
-  // }, []);
-
   useEffect(() => {
     console.log(deviceId);
   }, [deviceId]);
 
   return (
-    <div className="flex w-full h-screen justify-center items-center">
-      <div className="flex w-full h-full p-20 flex-col justify-start items-center">
-        <div className="flex">
-          <button
-            className="w-40 h-10 bg-orange-500 text-white"
-            onClick={() => {
-              setStartScan(!startScan);
-            }}
-          >
-            {startScan ? "카메라 중지" : "카메라 작동"}
-          </button>
+    <div className="flex w-full h-full justify-start items-start flex-col border">
+      {!startScan ? (
+        <div className="flex w-full h-full justify-center items-center p-20 box-border">
+          <div className="flex w-3/4 h-3/4 rounded-lg border-4 border-dashed border-orange-500 flex-col p-10 justify-center items-center gap-y-3">
+            <p className=" text-lg font-semibold text-gray-500">안녕하세요!</p>
+            <p className=" text-lg text-gray-500">
+              현재 심사준비중인 종목은
+              <span className="text-lg font-bold text-black mx-3">
+                남자 일반부 -90Kg
+              </span>
+              입니다.
+            </p>
+            <p className=" text-lg text-gray-500">
+              원활한 경기 진행을 위해 심판 로그인이 필요합니다.
+            </p>
+            <p className=" text-lg text-gray-500">
+              QR로그인을 위해 아래 시작버튼을 눌러주세요
+            </p>
+            <div className="flex w-full justify-center items-center my-5">
+              <button
+                className="w-40 h-10 bg-orange-600 text-white text-lg"
+                onClick={() => setStartScan(true)}
+              >
+                시작하기
+              </button>
+            </div>
+          </div>
         </div>
-
-        {startScan && (
-          <div className="flex flex-col w-full h-full gap-y-2 justify-center items-center mt-2">
-            <div className="flex w-full justify-center items-center flex-col">
-              {devices &&
-                devices.map((device, idx) => (
-                  <div>
-                    <p>
-                      <span>{idx + 1}</span>
-                      <span>:</span>
-                      {device.groupId}
-                    </p>
-                  </div>
-                ))}
-            </div>
-            <div className="flex w-full justify-center items-center">
-              <button onClick={() => setSelected(!selected)}>좌우반전</button>
-            </div>
-            <div className="flex w-full justify-center items-center">
-              {devices &&
-                devices.map((device, idx) => (
-                  <button
-                    className="w-10 h-10 bg-orange-300 flex justify-center items-center"
-                    onClick={() =>
-                      device.deviceId &&
-                      setDeviceId((prev) => (prev = device.groupId))
-                    }
-                  >
-                    {idx + 1}
-                  </button>
-                ))}
-            </div>
-            <div className="flex w-full h-full justify-center items-top">
-              <QrReader
-                videoId={deviceId}
-                onResult={(result, error) => {
-                  if (!!result) {
-                    //setData(result?.text);
-                    setData(result);
-                  }
-                }}
-                className="w-3/4 h-3/4"
-                constraints={{
-                  facingMode: selected ? "user" : "environment",
-                }}
-              />
-            </div>
+      ) : (
+        <div className="flex w-full h-full justify-center items-center p-1 box-border">
+          <div className="flex w-3/5 h-3/5 rounded-lg  border-orange-500 flex-col p-5 justify-center items-center gap-y-3">
+            <QrReader
+              facingMode="user"
+              delay={1000}
+              onError={handleError}
+              onScan={handleScan}
+              // chooseDeviceId={()=>selected}
+              className="w-full h-full border-4"
+            />
+            <button
+              className="w-40 h-10 bg-orange-600 text-white text-lg"
+              onClick={() => {
+                setStartScan(!startScan);
+              }}
+            >
+              {startScan && "카메라 중지"}
+            </button>
           </div>
-        )}
-        {data && (
-          <div>
-            <p>{data.text && loginTime && data.text}</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

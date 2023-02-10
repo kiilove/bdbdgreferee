@@ -5,12 +5,12 @@ import QrLogin from "./QrLogin";
 const Login = () => {
   const [tab, setTab] = useState("qr");
   return (
-    <div className="flex w-full justify-center items-center h-full">
+    <div className="flex w-full justify-center items-center h-full ">
       <div
-        className="flex justify-center mt-10 flex-col gap-y-3 px-4 w-full"
+        className="flex justify-center mt-10 flex-col gap-y-3 p-4 w-full rounded-md shadow-md border"
         style={{ maxWidth: "1000px" }}
       >
-        <div className="flex w-full h-full justify-center items-start align-top flex-col gap-y-3 bg-slate-100">
+        <div className="flex w-full h-full justify-center items-start align-top flex-col gap-y-3 bg-slate-100 ">
           <div className="flex w-full h-12 bg-white">
             <div
               className={`flex w-1/2 h-full justify-center items-center ${
