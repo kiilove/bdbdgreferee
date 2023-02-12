@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const LocalLogin = () => {
   return (
@@ -21,12 +22,11 @@ const LocalLogin = () => {
             placeholder="비밀번호"
           />
         </div>
-        <button
-          className="w-full h-12 bg-orange-500 rounded-md border-gray-300 border"
-          onClick={() => (window.location.href = "/lobby")}
-        >
-          <span className=" text-base font-medium text-white">로그인</span>
-        </button>
+        <Link to="lobby">
+          <button className="w-full h-12 bg-orange-500 rounded-md border-gray-300 border">
+            <span className=" text-base font-medium text-white">로그인</span>
+          </button>
+        </Link>
       </div>
     </div>
   );
