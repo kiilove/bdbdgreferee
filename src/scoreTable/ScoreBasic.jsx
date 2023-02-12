@@ -15,6 +15,7 @@ const ScoreBasic = () => {
   const [scoreBoard, setScoreBoard] = useState({});
   const [totalScore, setTotalScore] = useState(0);
   const handleScoreBoard = (e) => {
+    console.log(e.target.value);
     setScoreBoard((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -26,12 +27,8 @@ const ScoreBasic = () => {
     setTotalScore((prev) => (prev = sumScore));
   };
 
-  const handleClear = () => {
-    setScoreBoard((prev) => (prev = {}));
-    setTotalScore((prev) => (prev = 0));
-  };
-
   useEffect(() => {
+    console.log(scoreBoard);
     const pickScore = Object.values(scoreBoard);
     pickScore.length && handleSumScore(pickScore);
   }, [scoreBoard]);
@@ -49,23 +46,28 @@ const ScoreBasic = () => {
                 <div className="flex h-full justify-start items-center gap-x-2 rounded-lg">
                   {scoreRange.map((score, sIdx) => (
                     <button
+                      key={`btn-${sIdx}`}
                       className={
                         Number(scoreBoard[title]) === score
                           ? "flex flex-col justify-center items-center w-20 rounded-lg border-green-300 border cursor-pointer bg-green-500 text-white font-semibold"
                           : "flex flex-col justify-center items-center w-20 rounded-lg border-green-300 border cursor-pointer"
                       }
                     >
-                      <div className="flex w-full justify-center items-center ">
-                        <input
-                          type="radio"
-                          className="w-full h-4 hidden"
-                          name={title}
-                          id={`${title}_${sIdx + 1}`}
-                          value={sIdx + 1}
-                          onChange={(e) => handleScoreBoard(e)}
-                        />
-                      </div>
+                      <input
+                        key={`rd-${sIdx}`}
+                        type="radio"
+                        className="hidden"
+                        name={title}
+                        id={`${title}_${sIdx + 1}`}
+                        value={sIdx + 1}
+                        onChange={(e) => {
+                          e.preventDefault();
+                          handleScoreBoard(e);
+                        }}
+                      />
+
                       <label
+                        key={`lbl-${sIdx}`}
                         htmlFor={`${title}_${sIdx + 1}`}
                         className="flex justify-center items-center w-full h-16 cursor-pointer"
                       >
@@ -106,18 +108,8 @@ const ScoreBasic = () => {
             </button>
           </div>
           <div className="flex w-full mt-1">
-            <button className="w-full h-20 bg-green-600 rounded-lg">
+            <button className="w-full h-20 bg-cyan-500 rounded-lg">
               <span className="text-lg font-semibold text-white">제 출</span>
-            </button>
-          </div>
-          <div className="flex w-full mt-1">
-            <button
-              className="w-full h-20 bg-cyan-200 rounded-lg"
-              onClick={() => handleClear()}
-            >
-              <span className="text-lg font-semibold text-cyan-600">
-                초 기 화
-              </span>
             </button>
           </div>
         </div>

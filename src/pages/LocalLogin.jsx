@@ -23,7 +23,7 @@ const LocalLogin = () => {
           />
         </div>
         <Link to="lobby">
-          <button className="w-full h-12 bg-orange-500 rounded-md border-gray-300 border">
+          <button className="w-full h-12 bg-green-500 rounded-md border-gray-300 border">
             <span className=" text-base font-medium text-white">로그인</span>
           </button>
         </Link>

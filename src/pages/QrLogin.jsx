@@ -84,10 +84,10 @@ const QrLogin = () => {
   }, [deviceId]);
 
   return (
-    <div className="flex w-full h-full justify-start items-start flex-col border">
+    <div className="flex w-full h-full justify-start items-start flex-col">
       {!startScan ? (
         <div className="flex w-full h-full justify-center items-center p-20 box-border">
-          <div className="flex w-3/4 h-3/4 rounded-lg border-4 border-dashed border-orange-500 flex-col p-10 justify-center items-center gap-y-3">
+          <div className="flex w-3/4 h-3/4 rounded-lg border-4 border-dashed border-green-500 flex-col p-10 justify-center items-center gap-y-3">
             <p className=" text-lg font-semibold text-gray-500">안녕하세요!</p>
             <p className=" text-lg text-gray-500">
               현재 심사준비중인 종목은
@@ -104,7 +104,7 @@ const QrLogin = () => {
             </p>
             <div className="flex w-full justify-center items-center my-5">
               <button
-                className="w-40 h-10 bg-orange-600 text-white text-lg"
+                className="w-40 h-14 bg-green-500 text-white text-lg rounded-lg"
                 onClick={() => setStartScan(true)}
               >
                 시작하기
@@ -124,7 +124,7 @@ const QrLogin = () => {
               className="w-full h-full border-4"
             />
             <button
-              className="w-40 h-10 bg-orange-600 text-white text-lg"
+              className="w-40 h-14 bg-green-600 text-white text-lg rounded-lg"
               onClick={() => {
                 setStartScan(!startScan);
               }}

@@ -14,7 +14,7 @@ const Login = () => {
           <div className="flex w-full h-12 bg-white">
             <div
               className={`flex w-1/2 h-full justify-center items-center ${
-                tab === "qr" && "border-b-2 border-orange-500"
+                tab === "qr" && "border-b-2 border-green-500"
               } hover:cursor-pointer`}
               onClick={() => setTab((prev) => (prev = "qr"))}
             >
@@ -22,7 +22,7 @@ const Login = () => {
             </div>
             <div
               className={`flex w-1/2 h-full  justify-center items-center ${
-                tab === "local" && "border-b-2 border-orange-500"
+                tab === "local" && "border-b-2 border-green-500"
               }  hover:cursor-pointer`}
               onClick={() => setTab((prev) => (prev = "local"))}
             >
