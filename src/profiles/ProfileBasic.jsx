@@ -4,7 +4,7 @@ const ProfileBasic = () => {
   return (
     <div className="flex w-full h-full justify-start items-start flex-col p-5">
       <div className="flex w-full h-full">
-        <span>채점표</span>
+        <span>선수프로필</span>
       </div>
       <div className="flex w-full h-full justify-center">
         <img
