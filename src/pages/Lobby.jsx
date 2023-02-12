@@ -47,20 +47,18 @@ const Lobby = () => {
             <div className="flex w-full h-12">
               <span className="text-lg font-bold tracking-wider">심사중</span>
             </div>
-            <div className="flex w-full h-full justify-between items-start flex-wrap gap-5 mb-10 bg-green-600 py-5 px-3 rounded-lg">
+            <div className="flex w-full h-full justify-center items-start flex-wrap gap-5 mb-10 py-5 px-3 rounded-lg shadow">
               {dummyGames
                 .filter((game) => game.state === "심사중")
                 .map((item, idx) => (
                   <Link to="/scoring">
-                    <div className="glow-on-hover bg-white">
+                    <div className="glow-on-hover bg-white w-80 h-32 flex">
                       <div className="flex w-full justify-center items-center h-full flex-col">
-                        <span className="text-lg font-bold text-green-500">
+                        <span className="text-3xl font-bold text-green-500">
                           {item.title}
                         </span>
                         <div className="flex w-full justify-center items-center mt-2">
-                          <span className="text-green-800 text-sm">
-                            심사위원 입장
-                          </span>
+                          <span className="text-green-800">심사위원 입장</span>
                         </div>
                       </div>
                     </div>

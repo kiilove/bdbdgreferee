@@ -557,10 +557,9 @@ i:nth-child(40) {
 }
 
 .glow-on-hover {
-  width: 208px;
-  height: 112px;
   border: none;
   outline: none;
+
   color: #fff;
   background-color: rgb(255 255 255 / 1);
   cursor: pointer;
