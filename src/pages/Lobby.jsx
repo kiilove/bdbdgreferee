@@ -1,45 +1,108 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import "../css/buttonAnimate.css";
 
 const dummyGames = [
-  { id: 1, title: "학생부", state: "end" },
-  { id: 2, title: "장년부", state: "end" },
-  { id: 3, title: "여자피지크", state: "end" },
-  { id: 4, title: "비키니 휘트니스", state: "end" },
-  { id: 5, title: "남자 피지크", state: "end" },
-  { id: 6, title: "여자 청바지핏 모델", state: "end" },
-  { id: 7, title: "남자 청바지핏 모델", state: "end" },
-  { id: 8, title: "클래식 보디빌딩", state: "end" },
+  { id: 1, title: "학생부", state: "종료" },
+  { id: 2, title: "장년부", state: "종료" },
+  { id: 3, title: "여자피지크", state: "심사중" },
+  { id: 4, title: "비키니 휘트니스", state: "시작전" },
+  { id: 5, title: "남자 피지크", state: "시작전" },
+  { id: 6, title: "여자 청바지핏 모델", state: "시작전" },
+  { id: 7, title: "남자 청바지핏 모델", state: "시작전" },
+  { id: 8, title: "클래식 보디빌딩", state: "시작전" },
 ];
 
 const Lobby = () => {
   return (
     <div className="flex w-full justify-center items-center h-full ">
       <div
-        className="flex justify-center mt-10 flex-col gap-y-3 p-4 w-full rounded-md border"
+        className="flex justify-center mt-10 flex-col gap-y-3 py-3 px-10  w-full rounded-md border border-gray-200 shadow-md"
         style={{ maxWidth: "1000px" }}
       >
         <div className="flex w-full h-full justify-center items-center flex-col">
-          <div className="flex">
-            <h1>
-              안녕하세요!<span>김진배</span> 심판님
+          <div className="flex my-1">
+            <h1 className="text-gray-600 text-lg">
+              안녕하세요!
+              <span className="text-gray-800 text-xl font-bold mx-3">
+                김진배
+              </span>{" "}
+              심사위원님
             </h1>
           </div>
-          <div className="flex">
-            <h2>
-              현재 <span>경기용인시보디빌딩대회 13회</span>에 배정되셨습니다.
-            </h2>
+          <div className="flex my-1">
+            <h1 className="text-gray-600 text-lg">
+              현재{" "}
+              <span className="text-green-900 text-xl font-bold mx-3">
+                경기용인시보디빌딩대회 13회
+              </span>
+              에 배정되셨습니다.
+            </h1>
           </div>
-          <div className="flex">
+          <div className="flex mt-2 mb-5">
             <h2>오늘 배정된 종목의 목록은 아래와 같습니다.</h2>
           </div>
 
-          <div className="flex w-full h-full justify-evenly items-start flex-wrap">
+          <div className="flex w-full h-full flex-col">
+            <div className="flex w-full h-12">
+              <span className="text-lg font-bold tracking-wider">심사중</span>
+            </div>
+            <div className="flex w-full h-full justify-between items-start flex-wrap gap-5 mb-10 bg-green-600 py-5 px-3 rounded-lg">
+              {dummyGames
+                .filter((game) => game.state === "심사중")
+                .map((item, idx) => (
+                  <Link to="/scoring">
+                    <div className="glow-on-hover bg-white">
+                      <div className="flex w-full justify-center items-center h-full flex-col">
+                        <span className="text-lg font-bold text-green-500">
+                          {item.title}
+                        </span>
+                        <div className="flex w-full justify-center items-center mt-2">
+                          <span className="text-green-800 text-sm">
+                            심사위원 입장
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+            </div>
+            <div className="flex w-full h-12">
+              <span className="text-lg font-semibold text-gray-500 ">
+                시작전(배정된 종목중 아직 시작전 종목 목록입니다.)
+              </span>
+            </div>
+            <div className="flex w-full h-full justify-between items-start flex-wrap gap-5">
+              {dummyGames
+                .filter((game) => game.state === "시작전")
+                .map((item, idx) => (
+                  <div className="flex w-52 h-28 rounded-lg shadow-md border border-gray-300 flex-col justify-center items-center bg-green-300 cursor-not-allowed">
+                    <div className="flex w-full justify-center items-center">
+                      <span className="text-gray-600 font-light text-sm">
+                        {item.title}
+                      </span>
+                    </div>
+                    <div className="flex w-full justify-center items-center">
+                      <span className="text-gray-600  font-light text-sm mt-2">
+                        종목 시작전
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {/* <div className="flex w-full h-12">
+              <span>전체 종목</span>
+            </div>
             {dummyGames.map((item, idx) => (
-              <div className="flex w-28 h-40 rounded-lg shadow-md border border-green-700 flex-col">
-                <div className="flex w-full">{item.title}</div>
-                <div className="flex w-full">{item.state}</div>
+              <div className="flex w-40 h-28 rounded-lg shadow-md border border-green-700 flex-col justify-center items-center">
+                <div className="flex w-full justify-center items-center">
+                  {item.title}
+                </div>
+                <div className="flex w-full justify-center items-center">
+                  {item.state}
+                </div>
               </div>
-            ))}
+            ))} */}
           </div>
         </div>
       </div>
