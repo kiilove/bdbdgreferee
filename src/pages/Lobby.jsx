@@ -47,7 +47,7 @@ const Lobby = () => {
             <div className="flex w-full h-12">
               <span className="text-lg font-bold tracking-wider">심사중</span>
             </div>
-            <div className="flex w-full h-full justify-center items-start flex-wrap gap-5 mb-10 py-5 px-3 rounded-lg shadow">
+            <div className="flex w-full h-full justify-center items-start flex-wrap gap-5 mb-10 py-5 px-3 rounded-lg shadow bg-slate-700">
               {dummyGames
                 .filter((game) => game.state === "심사중")
                 .map((item, idx) => (
