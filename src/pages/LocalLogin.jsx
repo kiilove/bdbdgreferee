@@ -23,7 +23,7 @@ const LocalLogin = () => {
         </div>
         <button
           className="w-full h-12 bg-orange-500 rounded-md border-gray-300 border"
-          onClick={() => (window.location.href = "/home")}
+          onClick={() => (window.location.href = "/lobby")}
         >
           <span className=" text-base font-medium text-white">로그인</span>
         </button>
