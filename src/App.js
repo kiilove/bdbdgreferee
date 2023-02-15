@@ -17,6 +17,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <Lobby />
+            </RequireAuth>
+          }
+        />
         <Route path="/login" element={<Login />} />
 
         <Route
