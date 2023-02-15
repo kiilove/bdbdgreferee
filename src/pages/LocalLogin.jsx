@@ -1,72 +1,65 @@
+import { async } from "@firebase/util";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
+import { useContext } from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Encrypter } from "../components/Encrypto";
+import { Link, useNavigate } from "react-router-dom";
+import { Decrypter, Encrypter } from "../components/Encrypto";
 import { handleToast } from "../components/HandleToast";
+import { AuthContext } from "../context/AuthContext";
 import { db } from "../firebase";
 
 const LocalLogin = () => {
   const [resLoginData, setResLoginData] = useState([]);
   const [loginInfo, setLoginInfo] = useState({});
+  const [loginUSer, setLoginUser] = useState({});
+  const navigate = useNavigate();
 
-  const TeltoEmail = async ({ tel }) => {
-    const encryTel = Encrypter(tel);
-    console.log(encryTel);
-    let tempData = [];
-    const findEmailQ = query(
-      collection(db, "referee"),
-      where("refTel", "==", Encrypter(tel.toString()))
-    );
-
-    const queryResult = await getDocs(findEmailQ);
-    console.log(queryResult);
-
-    queryResult.forEach((doc) => {
-      //tempData.push({ ...doc.data() });
-      console.log(doc.data());
-    });
-
-    //console.log(tempData);
-  };
+  const { dispatch } = useContext(AuthContext);
 
   const handleInputs = (e) => {
     e.preventDefault();
     setLoginInfo(() => ({ ...loginInfo, [e.target.name]: e.target.value }));
   };
-  const handleLogin = async ({ email, PWD }) => {
+  const handleLogin = async () => {
     const auth = getAuth();
-    await signInWithEmailAndPassword(auth, email, PWD)
+
+    await signInWithEmailAndPassword(
+      auth,
+      loginInfo.refEmail,
+      loginInfo.refPassword
+    )
       .then((user) => {
         const userInfo = user;
-        return userInfo;
+        console.log(userInfo);
+        dispatch({ type: "LOGIN", payload: userInfo });
       })
+      .then(() => navigate("/lobby"))
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-
-        handleToast({ type: "error", msg: errorMessage });
+        console.log(errorCode);
+        console.log(errorMessage);
+        //handleToast({ type: "error", msg: errorMessage });
       });
   };
 
-  useEffect(() => {
-    //console.log(loginInfo);
-  }, [loginInfo]);
+  useMemo(() => console.log(loginUSer), [loginUSer]);
 
   return (
     <div className="flex w-full h-full justify-center items-center">
       <div className="flex flex-col w-full h-full p-20 gap-y-5">
         <div className="flex justify-center">
-          <p className="text-gray-800">전화번호(휴대전화번호) 로그인</p>
+          <p className="text-gray-800">이메일 로그인</p>
         </div>
         <div className="flex justify-center">
           <input
             type="text"
-            name="refTel"
-            value={loginInfo.refTel}
+            name="refEmail"
+            value={loginInfo.refEmail}
             className="w-full h-12 rounded-md focus:ring-0 focus:outline-orange-400 border border-gray-400 px-5 font-light"
-            placeholder="전화번호"
+            placeholder="이메일"
             onChange={(e) => handleInputs(e)}
           />
         </div>
@@ -83,9 +76,12 @@ const LocalLogin = () => {
 
         <button
           className="w-full h-12 bg-green-500 rounded-md border-gray-300 border"
-          onClick={() => {
-            TeltoEmail({ tel: loginInfo.refTel });
-          }}
+          onClick={() =>
+            handleLogin({
+              email: loginInfo.refEmail,
+              password: loginInfo.refPassword,
+            })
+          }
         >
           <span className=" text-base font-medium text-white">로그인</span>
         </button>
