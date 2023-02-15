@@ -3,6 +3,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useMemo } from "react";
 import { useContext } from "react";
+import { useRef } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Decrypter, Encrypter } from "../components/Encrypto";
@@ -18,21 +19,23 @@ const LocalLogin = () => {
 
   const { dispatch } = useContext(AuthContext);
 
-  const handleInputs = (e) => {
-    e.preventDefault();
-    setLoginInfo(() => ({ ...loginInfo, [e.target.name]: e.target.value }));
-  };
+  const loginEmailRef = useRef();
+  const loginPasswordRef = useRef();
+
+  // const handleInputs = (e) => {
+  //   e.preventDefault();
+  //   setLoginInfo(() => ({ ...loginInfo, [e.target.name]: e.target.value }));
+  // };
   const handleLogin = async () => {
     const auth = getAuth();
 
     await signInWithEmailAndPassword(
       auth,
-      loginInfo.refEmail,
-      loginInfo.refPassword
+      loginEmailRef.current.value,
+      loginPasswordRef.current.value
     )
       .then((user) => {
         const userInfo = user;
-        console.log(userInfo);
         dispatch({ type: "LOGIN", payload: userInfo });
       })
       .then(() => navigate("/lobby"))
@@ -57,31 +60,26 @@ const LocalLogin = () => {
           <input
             type="text"
             name="refEmail"
+            ref={loginEmailRef}
             value={loginInfo.refEmail}
             className="w-full h-12 rounded-md focus:ring-0 focus:outline-orange-400 border border-gray-400 px-5 font-light"
             placeholder="이메일"
-            onChange={(e) => handleInputs(e)}
           />
         </div>
         <div className="flex justify-center">
           <input
             type="password"
             name="refPassword"
+            ref={loginPasswordRef}
             value={loginInfo.refPassword}
             className="w-full h-12 rounded-md focus:ring-0 focus:outline-orange-400 border border-gray-400 px-5 font-light"
             placeholder="비밀번호"
-            onChange={(e) => handleInputs(e)}
           />
         </div>
 
         <button
           className="w-full h-12 bg-green-500 rounded-md border-gray-300 border"
-          onClick={() =>
-            handleLogin({
-              email: loginInfo.refEmail,
-              password: loginInfo.refPassword,
-            })
-          }
+          onClick={() => handleLogin()}
         >
           <span className=" text-base font-medium text-white">로그인</span>
         </button>

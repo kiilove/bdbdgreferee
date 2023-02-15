@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Decrypter } from "../components/Encrypto";
+import Header from "../components/Header";
 import "../css/buttonAnimate.css";
 import { db } from "../firebase";
 
@@ -23,10 +24,8 @@ const Lobby = () => {
   const [refereeInfo, setRefereeInfo] = useState({});
   const [refereeName, setRefereeName] = useState();
   const currentUser = JSON.parse(sessionStorage.getItem("user"));
-  console.log(currentUser.user.uid);
 
   const getUserInfo = async (userUid) => {
-    userUid && console.log(userUid);
     const refereeRef = collection(db, "referee");
     const refereeQ = query(refereeRef, where("refUid", "==", userUid));
     const refereeSnapshot = await getDocs(refereeQ);
@@ -34,12 +33,18 @@ const Lobby = () => {
     refereeSnapshot.forEach((doc) => setRefereeInfo(() => ({ ...doc.data() })));
   };
 
+  const getUserName = (keyValue) => {
+    const decrypted = Decrypter(keyValue);
+    return decrypted;
+  };
+
   useMemo(() => getUserInfo(currentUser.user.uid), []);
-  useMemo(
-    () => refereeInfo.refName && setRefereeName(Decrypter(refereeInfo.refName)),
-    [refereeInfo.refName]
-  );
-  // const currentUserId = currentUser.uid;
+
+  useEffect(() => {
+    refereeInfo.refName !== undefined &&
+      setRefereeName(getUserName(refereeInfo.refName));
+  }, [refereeInfo.refName]);
+
   return (
     <div className="flex w-full justify-center items-center h-full ">
       {currentUser && refereeInfo ? (
@@ -47,13 +52,16 @@ const Lobby = () => {
           className="flex justify-center mt-10 flex-col gap-y-3 py-3 px-10  w-full rounded-md border border-gray-200 shadow-md"
           style={{ maxWidth: "1000px" }}
         >
+          <div className="flex w-full h-20">
+            <Header />
+          </div>
           <div className="flex w-full h-full justify-center items-center flex-col">
             <div className="flex my-1">
               <h1 className="text-gray-600 text-lg">
                 안녕하세요!
                 <span className="text-gray-800 text-xl font-bold mx-3">
-                  {refereeName}
-                </span>{" "}
+                  {refereeName !== undefined && refereeName}
+                </span>
                 심사위원님
               </h1>
             </div>

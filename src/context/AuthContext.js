@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useMemo, useReducer } from "react";
 import { useEffect } from "react";
 import { createContext } from "react";
 import { AuthReducer } from "./AuthReducer";
@@ -10,9 +10,9 @@ const INITIAL_STATE = {
 export const AuthContext = createContext(INITIAL_STATE);
 export const AuthContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE);
-
-  useEffect(() => {
-    console.log("session");
+  //console.log(state);
+  useMemo(() => {
+    //console.log("memo", state);
     sessionStorage.setItem("user", JSON.stringify(state.currentUser));
   }, [state.currentUser]);
 
