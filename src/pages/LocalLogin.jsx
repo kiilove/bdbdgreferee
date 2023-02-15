@@ -84,7 +84,7 @@ const LocalLogin = () => {
         <button
           className="w-full h-12 bg-green-500 rounded-md border-gray-300 border"
           onClick={() => {
-            TeltoEmail({ tel: loginInfo.refTel });
+            window.location.href = "/scoring";
           }}
         >
           <span className=" text-base font-medium text-white">로그인</span>
