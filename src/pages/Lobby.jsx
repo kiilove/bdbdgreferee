@@ -3,6 +3,7 @@ import React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useMemo } from "react";
+import { Bars } from "react-loader-spinner";
 import { Link } from "react-router-dom";
 import { Decrypter } from "../components/Encrypto";
 import Header from "../components/Header";
@@ -46,15 +47,15 @@ const Lobby = () => {
   }, [refereeInfo.refName]);
 
   return (
-    <div className="flex w-full justify-center items-center h-full ">
-      {currentUser && refereeInfo ? (
+    <div className="flex w-full justify-center items-center h-full flex-col">
+      <div className="flex w-full h-20 justify-center">
+        <Header />
+      </div>
+      {refereeName ? (
         <div
           className="flex justify-center mt-10 flex-col gap-y-3 py-3 px-10  w-full rounded-md border border-gray-200 shadow-md"
           style={{ maxWidth: "1000px" }}
         >
-          <div className="flex w-full h-20">
-            <Header />
-          </div>
           <div className="flex w-full h-full justify-center items-center flex-col">
             <div className="flex my-1">
               <h1 className="text-gray-600 text-lg">
@@ -142,10 +143,9 @@ const Lobby = () => {
           </div>
         </div>
       ) : (
-        <div
-          className="flex justify-center mt-10 flex-col gap-y-3 py-3 px-10  w-full rounded-md border border-gray-200 shadow-md"
-          style={{ maxWidth: "1000px" }}
-        ></div>
+        <div className="flex w-full h-screen justify-center items-center align-middle">
+          <Bars color="green" />
+        </div>
       )}
     </div>
   );
