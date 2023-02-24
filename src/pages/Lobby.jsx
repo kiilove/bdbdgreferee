@@ -87,7 +87,7 @@ const Lobby = () => {
                 {dummyGames
                   .filter((game) => game.state === "심사중")
                   .map((item, idx) => (
-                    <Link to="/scoring">
+                    <Link to="/scorevertical">
                       <div className="glow-on-hover bg-white w-80 h-32 flex">
                         <div className="flex w-full justify-center items-center h-full flex-col">
                           <span className="text-3xl font-bold text-green-500">
