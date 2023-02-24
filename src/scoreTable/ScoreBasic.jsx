@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 
 const titleList = [
-  "항목1",
-  "항목2",
-  "항목3",
-  "항목4",
-  "항목5",
-  "항목6",
-  "항목7",
+  "외관의 이미지",
+  "신체의 대칭미",
+  "포징 및 표현력",
+  "복장 선택 및 용품의 조화",
 ];
 const scoreRange = [1, 2, 3, 4, 5, 6];
 
@@ -40,8 +37,8 @@ const ScoreBasic = () => {
           {titleList.map((title, tIdx) => (
             <div className="flex w-full gap-x-2">
               <div className="flex h-18 p-2 border border-green-200 rounded-md gap-x-2">
-                <div className="flex w-20 justify-center items-center bg-gray-200 rounded-lg border border-gray-200">
-                  <span>{title}</span>
+                <div className="flex w-40 justify-center items-center bg-gray-200 rounded-lg border border-gray-200">
+                  <span className="text-sm">{title}</span>
                 </div>
                 <div className="flex h-full justify-start items-center gap-x-2 rounded-lg">
                   {scoreRange.map((score, sIdx) => (
@@ -89,7 +86,7 @@ const ScoreBasic = () => {
           <div className="flex flex-col h-full">
             <div
               className="flex w-full h-16 justify-center items-center rounded-t-md bg-green-500 border-b border-green-200"
-              style={{ minWidth: "188px" }}
+              style={{ minWidth: "168px" }}
             >
               <span className="text-2xl text-white">합 계</span>
             </div>

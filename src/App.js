@@ -5,6 +5,7 @@ import Lobby from "./pages/Lobby";
 import Scoring from "./pages/Scoring";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
+import ScoreVertical from "./pages/ScoreVertical";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -39,6 +40,14 @@ function App() {
           element={
             <RequireAuth>
               <Scoring />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/scorevertical"
+          element={
+            <RequireAuth>
+              <ScoreVertical />
             </RequireAuth>
           }
         />
