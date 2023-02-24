@@ -6,6 +6,7 @@ import Scoring from "./pages/Scoring";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import ScoreVertical from "./pages/ScoreVertical";
+import VerticalRank from "./scoreTable/VerticalRank";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -48,6 +49,14 @@ function App() {
           element={
             <RequireAuth>
               <ScoreVertical />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/scorevertical2"
+          element={
+            <RequireAuth>
+              <VerticalRank />
             </RequireAuth>
           }
         />

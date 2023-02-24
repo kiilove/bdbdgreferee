@@ -3,14 +3,13 @@ import { useMemo } from "react";
 import { useEffect } from "react";
 import { useCallback } from "react";
 import { useState } from "react";
-import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import ProfileBasic from "../profiles/ProfileBasic";
 import ProfileMini from "../profiles/ProfileMini";
 import ScoreBasic from "../scoreTable/ScoreBasic";
 
 const Scoring = () => {
   const [fullMode, setFullMode] = useState(true);
-  const handle = useFullScreenHandle();
+  const type = "rank";
 
   return (
     <div className="flex w-full justify-center items-start h-full ">

@@ -1,7 +1,9 @@
 import React from "react";
 import VerticalMark from "../scoreTable/VerticalMark";
+import VerticalRank from "../scoreTable/VerticalRank";
 
 const ScoreVertical = () => {
+  const type = "rankin";
   return (
     <div className="flex w-full justify-center items-start mb-44">
       <div
@@ -49,7 +51,7 @@ const ScoreVertical = () => {
           </div>
         </div>
         <div className="flex w-full h-full">
-          <VerticalMark />
+          {type === "ranking" ? <VerticalRank /> : <VerticalMark />}
         </div>
       </div>
     </div>
