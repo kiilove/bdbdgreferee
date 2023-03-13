@@ -4,6 +4,7 @@ export const AuthReducer = (state, action) => {
       console.log("action", action.payload);
       return {
         currentUser: action.payload,
+        cupSchedual: action.cupSchedual,
       };
     case "LOGOUT":
       return {

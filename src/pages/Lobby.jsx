@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { Decrypter } from "../components/Encrypto";
 import Header from "../components/Header";
 import "../css/buttonAnimate.css";
+import { filterCupsByRefUid } from "../customHooks/filterRefereeAssignByRefUid";
 import { db } from "../firebase";
 
 const dummyGames = [
@@ -24,14 +25,24 @@ const dummyGames = [
 const Lobby = () => {
   const [refereeInfo, setRefereeInfo] = useState({});
   const [refereeName, setRefereeName] = useState();
+  const [getRefSchedual, setGetRefSchedual] = useState([]);
   const currentUser = JSON.parse(sessionStorage.getItem("user"));
 
   const getUserInfo = async (userUid) => {
+    console.log(userUid);
     const refereeRef = collection(db, "referee");
     const refereeQ = query(refereeRef, where("refUid", "==", userUid));
     const refereeSnapshot = await getDocs(refereeQ);
 
     refereeSnapshot.forEach((doc) => setRefereeInfo(() => ({ ...doc.data() })));
+
+    // const refSchedual = await filterCupsByRefUid(userUid);
+    //setGetRefSchedual([...refSchedual]);
+    // console.log(refSchedual);
+
+    filterCupsByRefUid(userUid).then((filteredCups) => {
+      console.log(filteredCups);
+    });
   };
 
   const getUserName = (keyValue) => {
@@ -70,7 +81,7 @@ const Lobby = () => {
               <h1 className="text-gray-600 text-lg">
                 현재{" "}
                 <span className="text-green-900 text-xl font-bold mx-3">
-                  경기용인시보디빌딩대회 13회
+                  {/* {`${getRefSchedual[0].cupInfo.cupName} ${getRefSchedual[0].cupInfo.cupCount}회`} */}
                 </span>
                 에 배정되셨습니다.
               </h1>

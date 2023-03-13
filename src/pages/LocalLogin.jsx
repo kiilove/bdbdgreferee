@@ -36,6 +36,7 @@ const LocalLogin = () => {
     )
       .then((user) => {
         const userInfo = user;
+        
         dispatch({ type: "LOGIN", payload: userInfo });
       })
       .then(() => navigate("/lobby"))
