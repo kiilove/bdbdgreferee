@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { RxBell } from "react-icons/rx";
 import "../css/vibration.css";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const { dispatch } = useContext(AuthContext);
@@ -19,9 +20,11 @@ const Header = () => {
           </span>
         </div>
         <div className="flex">
-          <span className="text-sm text-gray-600 hover:text-gray-800 hover:font-semibold cursor-pointer">
-            마이페이지
-          </span>
+          <Link to="/onlyadmin">
+            <span className="text-sm text-gray-600 hover:text-gray-800 hover:font-semibold cursor-pointer">
+              마이페이지
+            </span>
+          </Link>
         </div>
 
         <div className="flex">
