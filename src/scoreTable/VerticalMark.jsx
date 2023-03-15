@@ -6,11 +6,10 @@ const titleList = [
   "신체의 대칭미",
   "포징 및 표현력",
   "복장선택 및 용품의조화",
-  "가산점",
 ];
 const scoreRange = [1, 2, 3, 4, 5, 6];
 const playerRange = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109];
-const playersArray = [
+const playersArray1 = [
   { playerUid: "12346", playerName: "추성훈", gender: "m", playerNumber: 104 },
   { playerUid: "12587", playerName: "윤성빈", gender: "m", playerNumber: 108 },
   { playerUid: "14557", playerName: "양학선", gender: "m", playerNumber: 127 },
@@ -36,7 +35,9 @@ const playersArray = [
   { playerUid: "16524", playerName: "깡미", gender: "m", playerNumber: 196 },
 ];
 
-const VerticalMark = () => {
+const VerticalMark = (props) => {
+  console.log(props);
+  const [playersArray, setPlayersArray] = useState([]);
   const [scoreBoardArray, setScoreBoardArray] = useState([]);
   const [sumScoreArray, setSumScoreArray] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -48,6 +49,8 @@ const VerticalMark = () => {
   useEffect(() => {
     window.addEventListener("scroll", updateScroll);
   });
+
+  const handleAddScore
 
   const handleScoreBoard = (e, name, number, uid, title, pIdx) => {
     setPlayerArrayIndex((prev) => (prev = pIdx));
@@ -62,7 +65,9 @@ const VerticalMark = () => {
       },
     };
     dummy.splice(pIdx, 1, scoreData);
+    console.log(scoreData);
     setScoreBoardArray((prev) => (prev = dummy));
+    console.log(scoreBoardArray);
     //setScoreBoard((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -110,34 +115,48 @@ const VerticalMark = () => {
       dummyScore = { ...dummyScore, [title]: 0 };
     });
 
-    playersArray.map((item, idx) => {
+    // playersArray.map((item, idx) => {
+    //   const player = {
+    //     playerUid: item.playerUid,
+    //     playerName: item.playerName,
+    //     playerNumber: item.playerNumber,
+    //     score: dummyScore,
+    //   };
+    //   dummy.push(player);
+    //   dummySum.push(0);
+    // });
+
+    props.order.map((item, idx) => {
       const player = {
-        playerUid: item.playerUid,
-        playerName: item.playerName,
-        playerNumber: item.playerNumber,
+        playerUid: item.pId,
+        playerName: item.pName,
+        playerNumber: idx + 1,
         score: dummyScore,
       };
+      console.log(player);
       dummy.push(player);
       dummySum.push(0);
     });
-
+    console.log(dummy);
     setScoreBoardArray(dummy);
     setSumScoreArray(dummySum);
+    setPlayersArray(dummy);
   };
 
   useEffect(() => {
     handlePreSumScore(playerArrayIndex);
+    console.log(handlePreSumScore(playerArrayIndex));
   }, [scoreBoardArray]);
 
-  useMemo(() => initScoreBorad(), []);
+  useMemo(() => initScoreBorad(), [props]);
   useMemo(() => console.log(scoreBoardArray), []);
   return (
     scoreBoardArray.length > 0 && (
       <div className="flex w-full justify-start items-center flex-col gap-y-2">
-        {scrollPosition > 60 ? (
+        {scrollPosition > 40 ? (
           <div
             className="flex rounded-md gap-x-2 sticky bg-green-400 justify-center items-center w-full transition-opacity ease-in-out "
-            style={{ top: "100px", height: "50px" }}
+            style={{ top: "150px", height: "50px" }}
           >
             <div className="flex w-20 h-10 justify-center items-center bg-white rounded-lg ">
               <span className="text-sm">선수번호</span>
@@ -157,7 +176,7 @@ const VerticalMark = () => {
         ) : (
           <div
             className="flex w-full rounded-md gap-x-2 sticky bg-white justify-center items-center"
-            style={{ top: "100px", height: "50px" }}
+            style={{ top: "150px", height: "50px" }}
           >
             <div className="flex w-20 h-10 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
               <span className="text-sm">선수번호</span>
@@ -189,7 +208,7 @@ const VerticalMark = () => {
                   <span className="text-xs text-gray-500">초기화</span>
                 </button>
               </div>
-              {scoreBoardArray.length > 0 &&
+              {scoreBoardArray.length &&
                 titleList.map((title) => (
                   <div
                     className="flex h-full justify-center items-center bg-white rounded-lg border border-gray-200 flex-wrap p-1 gap-1"

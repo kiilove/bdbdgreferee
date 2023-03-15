@@ -7,6 +7,7 @@ import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import ScoreVertical from "./pages/ScoreVertical";
 import VerticalRank from "./scoreTable/VerticalRank";
+import AdminScore from "./pages/adminTools/AdminScore";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -60,6 +61,7 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route path="/onlyadmin" element={<AdminScore />} />
       </Routes>
     </BrowserRouter>
   );

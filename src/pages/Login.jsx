@@ -26,7 +26,7 @@ const Login = () => {
               }  hover:cursor-pointer`}
               onClick={() => setTab((prev) => (prev = "local"))}
             >
-              휴대전화번호 로그인
+              이메일 로그인
             </div>
           </div>
         </div>
