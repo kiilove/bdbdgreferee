@@ -50,8 +50,6 @@ const VerticalMark = (props) => {
     window.addEventListener("scroll", updateScroll);
   });
 
-  const handleAddScore
-
   const handleScoreBoard = (e, name, number, uid, title, pIdx) => {
     setPlayerArrayIndex((prev) => (prev = pIdx));
     let dummy = [...scoreBoardArray];
