@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import React from "react";
+import React, { useMemo } from "react";
 import { useState } from "react";
 import VerticalMark from "../scoreTable/VerticalMark";
 import VerticalRank from "../scoreTable/VerticalRank";
@@ -7,6 +7,11 @@ import VerticalRank from "../scoreTable/VerticalRank";
 const RankVertical = (getInfo, selectedType) => {
   const [scoreData, setScoreData] = useState([]);
   const [scoreBoardType, setScoreBoardType] = useState(selectedType);
+  const [rankingTable, setRankingTable] = useState([]);
+
+  useMemo(() => {
+    console.log("부모창", rankingTable);
+  }, [rankingTable]);
 
   return (
     <div className="flex w-full justify-start items-start mb-44">
@@ -81,6 +86,7 @@ const RankVertical = (getInfo, selectedType) => {
           <VerticalRank
             order={[...getInfo.getInfo.players]}
             referee={getInfo.getInfo.referee}
+            prevSetState={setRankingTable}
           />
         </div>
       </div>

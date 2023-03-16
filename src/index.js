@@ -4,12 +4,15 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { AuthContextProvider } from "./context/AuthContext";
+import { RankingBoardContextProvider } from "./context/RankingBoardContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <AuthContextProvider>
-      <App />
+      <RankingBoardContextProvider>
+        <App />
+      </RankingBoardContextProvider>
     </AuthContextProvider>
   </React.StrictMode>
 );

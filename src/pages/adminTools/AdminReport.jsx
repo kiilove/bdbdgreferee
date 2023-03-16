@@ -1,5 +1,6 @@
-import { where } from "firebase/firestore";
 import React from "react";
+import { where } from "firebase/firestore";
+
 import { useMemo } from "react";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -8,7 +9,7 @@ import useFirestoreSearch from "../../customHooks/useFirestoreSearch";
 import RankingBoard from "../RankingBoard";
 import ScoreVertical from "../ScoreVertical";
 
-const AdminScore = () => {
+const AdminReport = () => {
   const [getCups, setGetCups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedType, setSelectedType] = useState("랭킹형");
@@ -17,9 +18,12 @@ const AdminScore = () => {
   const [selectedReferee, setSelectedReferee] = useState({});
   const [enableReferee, setEnableReferee] = useState([]);
   const [enableClasses, setEnableClasses] = useState([]);
+  const [enableReportList, setEnableReportList] = useState([]);
+  const [reportListSort, setReportListSort] = useState([]);
   const [demoProps, setDemoProps] = useState({});
 
   const { data: getAdminData, readData: cupReadDatas } = useFirestore();
+  const { data: getRankBoard, readData: rankBoardReadDatas } = useFirestore();
   const conditions = [where("cupInfo.cupState", "==", "대회중")];
   const getCupDatasWithState = useFirestoreSearch("cups", conditions);
 
@@ -69,15 +73,12 @@ const AdminScore = () => {
       return [];
     }
 
-    const filteredAssigns = category.refereeAssign.filter(
-      (assign) =>
-        assign &&
-        assign.refUid &&
-        assign.refUid !== "" &&
-        assign.gameId === data.id
-    );
+    const refereeAssigns = category.refereeAssign;
 
-    return filteredAssigns;
+    return {
+      refereeTotal: [...refereeAssigns],
+      refereeLength: refereeAssigns.length,
+    };
   };
 
   const filterIsEntryGamesList = (data) => {
@@ -120,24 +121,28 @@ const AdminScore = () => {
     if (!getCups.length) {
       return;
     }
-    setIsLoading(false);
+    rankBoardReadDatas("rankingboard");
   }, [getCups]);
 
   useMemo(() => {
     if (!enableClasses || !getCups.length || !enableReferee) {
       return;
     }
+    console.log(selectedClasses.index);
     setDemoProps({
       cupId: selectedCup.cupId,
       gamesCategoryId: selectedClasses.id,
-      refUid: selectedReferee.refUid,
       players: [...enableClasses[selectedClasses.index].class.players],
+      playersLength: [...enableClasses[selectedClasses.index].class.players]
+        .length,
+
       cupData: { ...getCups[selectedCup.index] },
       gameData: { ...enableClasses[selectedClasses.index] },
-      referee: { ...enableReferee[selectedReferee.index] },
-      seatIndex: selectedReferee.index + 1,
+      classTitle: selectedClasses.classTitle,
+      refereeLength: enableReferee.refereeLength,
+      refereeTotal: [...enableReferee.refereeTotal],
     });
-  }, [selectedCup, selectedClasses, selectedReferee]);
+  }, [selectedCup, selectedClasses.classTitle]);
 
   useEffect(() => {
     if (!getCupDatasWithState.data.length) {
@@ -145,6 +150,67 @@ const AdminScore = () => {
     }
     setGetCups([...getCupDatasWithState.data]);
   }, [getCupDatasWithState.data]);
+
+  useMemo(() => {
+    if (!demoProps.cupId) {
+      return;
+    }
+
+    console.log("demo", demoProps);
+  }, [demoProps]);
+
+  useMemo(() => {
+    if (!getRankBoard.length) {
+      return;
+    }
+    console.log(
+      demoProps.cupId,
+      demoProps.gamesCategoryId,
+      demoProps.classTitle
+    );
+    const fiterByClasses = getRankBoard.filter(
+      (filter) =>
+        filter.refCupId === demoProps.cupId &&
+        filter.refGameId === demoProps.gamesCategoryId &&
+        filter.refClassTitle === demoProps.classTitle
+    );
+
+    const uniqueClassTitles = new Set(
+      fiterByClasses.map((result) => result.refClassTitle)
+    );
+    const uniqueClassTitleArray = Array.from(uniqueClassTitles);
+    console.log(uniqueClassTitleArray);
+    setEnableReportList(fiterByClasses);
+    console.log(fiterByClasses);
+    setIsLoading(false);
+  }, [getRankBoard, selectedClasses]);
+
+  useMemo(() => {
+    if (!enableReportList.length) {
+      return;
+    }
+    console.log("지금 제일 중요", enableReportList);
+    const sortedArray = enableReportList.sort((a, b) => {
+      if (a.playerNumber !== b.playerNumber) {
+        return a.playerNumber - b.playerNumber; // playerNumber 오름차순 정렬
+      } else {
+        return a.refSeatIndex - b.refSeatIndex; // playerNumber가 같을 경우 refSeatIndex 오름차순 정렬
+      }
+    });
+    setReportListSort([...sortedArray]);
+    const groupByPlayerNumber = (players) =>
+      players.reduce((result, player) => {
+        // playerNumber를 기준으로 그룹화된 객체를 생성
+        const group = result[player.playerNumber] || [];
+        // 그룹에 현재 player 객체를 추가
+        group.push(player);
+        // 그룹화된 객체를 result 객체에 추가
+        return { ...result, [player.playerNumber]: group };
+      }, {});
+    console.log(groupByPlayerNumber(enableReportList));
+  }, [enableReportList]);
+
+  useMemo(() => console.log(selectedClasses), [selectedClasses]);
 
   return (
     <div className="flex w-full flex-col justify-start h-screen items-center px-5">
@@ -174,28 +240,13 @@ const AdminScore = () => {
                       {cup.cupInfo.cupName}
                     </button>
                   )}
-                  {selectedType === "점수형" ? (
-                    <button
-                      className="flex bg-white text-blue-800 py-3 px-5 rounded-md border border-blue-800 hover:bg-white hover:text-blue-800"
-                      onClick={() => setSelectedType("랭킹형")}
-                    >
-                      점수형
-                    </button>
-                  ) : (
-                    <button
-                      className="flex bg-white text-blue-800 py-3 px-5 rounded-md border border-blue-800 hover:bg-white hover:text-blue-800"
-                      onClick={() => setSelectedType("점수형")}
-                    >
-                      랭킹형
-                    </button>
-                  )}
                 </div>
               ))}
             </div>
             <div className="flex justify-start items-start h-full gap-x-1">
               <div className="flex w-72 gap-x-2 flex-wrap">
                 <div className="flex w-full flex-wrap gap-1">
-                  {enableClasses &&
+                  {getRankBoard &&
                     enableClasses.map((classes, cIdx) => (
                       <div className="flex justify-center items-center text-white text-sm">
                         {selectedClasses.index === cIdx ? (
@@ -205,6 +256,7 @@ const AdminScore = () => {
                               setSelectedClasses({
                                 id: classes.id,
                                 index: cIdx,
+                                classTitle: classes.classTitle,
                               })
                             }
                           >
@@ -220,6 +272,7 @@ const AdminScore = () => {
                               setSelectedClasses({
                                 id: classes.id,
                                 index: cIdx,
+                                classTitle: classes.classTitle,
                               })
                             }
                           >
@@ -233,48 +286,14 @@ const AdminScore = () => {
                     ))}
                 </div>
               </div>
-              <div className="flex w-32 h-full gap-x-1 flex-col items-start gap-1 justify-start ">
-                {enableReferee &&
-                  enableReferee.map((referee, rIdx) => (
-                    <div className="flex h-full justify-center items-center text-white">
-                      {selectedReferee.index === rIdx ? (
-                        <button
-                          className="flex w-32 bg-white text-green-800 py-3 px-5 rounded-md border border-green-800 hover:bg-white hover:text-green-800"
-                          onClick={() =>
-                            setSelectedReferee({
-                              refUid: referee.refUid,
-                              index: rIdx,
-                            })
-                          }
-                        >
-                          {referee.refName}
-                        </button>
-                      ) : (
-                        <button
-                          className="flex w-32 bg-green-600 py-3 px-5 rounded-md border border-green-800 hover:bg-white hover:text-green-800"
-                          onClick={() =>
-                            setSelectedReferee({
-                              refUid: referee.refUid,
-                              index: rIdx,
-                            })
-                          }
-                        >
-                          {referee.refName}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-              </div>
+              <div className="flex w-32 h-full gap-x-1 flex-col items-start gap-1 justify-start "></div>
             </div>
           </div>
-          {selectedReferee.refUid && demoProps && selectedType === "점수형" && (
-            <div className="flex w-full h-full ">
-              <ScoreVertical getInfo={demoProps} selectdType={selectedType} />
-            </div>
-          )}
-          {selectedReferee.refUid && demoProps && selectedType === "랭킹형" && (
-            <div className="flex w-full h-full ">
-              <RankingBoard getInfo={demoProps} selectdType={selectedType} />
+          {reportListSort.length && (
+            <div className="flex flex-col w-full h-full">
+              {reportListSort.map((report, idx) => (
+                <div className="flex">{report.playerNumber}</div>
+              ))}
             </div>
           )}
         </div>
@@ -283,4 +302,4 @@ const AdminScore = () => {
   );
 };
 
-export default AdminScore;
+export default AdminReport;

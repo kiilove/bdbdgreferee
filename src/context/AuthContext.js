@@ -1,10 +1,9 @@
 import { useMemo, useReducer } from "react";
-import { useEffect } from "react";
 import { createContext } from "react";
 import { AuthReducer } from "./AuthReducer";
 
 const INITIAL_STATE = {
-  currentUser: JSON.parse(sessionStorage.getItem("user")),
+  currentUser: JSON.parse(sessionStorage.getItem("user")) || "",
 };
 
 export const AuthContext = createContext(INITIAL_STATE);

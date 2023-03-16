@@ -8,6 +8,8 @@ import { AuthContext } from "./context/AuthContext";
 import ScoreVertical from "./pages/ScoreVertical";
 import VerticalRank from "./scoreTable/VerticalRank";
 import AdminScore from "./pages/adminTools/AdminScore";
+import AdminLobby from "./pages/adminTools/AdminLobby";
+import AdminReport from "./pages/adminTools/AdminReport";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -61,7 +63,9 @@ function App() {
             </RequireAuth>
           }
         />
-        <Route path="/onlyadmin" element={<AdminScore />} />
+        <Route path="/onlyadmin" element={<AdminLobby />} />
+        <Route path="/adminscore" element={<AdminScore />} />
+        <Route path="/adminreport" element={<AdminReport />} />
       </Routes>
     </BrowserRouter>
   );

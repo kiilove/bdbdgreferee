@@ -8,8 +8,16 @@ const ScoreVertical = (getInfo, selectedType) => {
   const [scoreData, setScoreData] = useState([]);
   const [scoreBoardType, setScoreBoardType] = useState(selectedType);
 
-  console.log(getInfo);
-  console.log(selectedType);
+
+  const makeDocuId = () => {
+    const randomString = Math.random().toString(36).substring(2, 6);
+    const id = (
+      randomString +
+      "-" +
+      Date.now().toString().substr(-6)
+    ).toUpperCase();
+    return id;
+  };
 
   return (
     <div className="flex w-full justify-start items-start mb-44">
@@ -81,7 +89,10 @@ const ScoreVertical = (getInfo, selectedType) => {
           </div>
         </div>
         <div className="flex w-full h-full">
-          <VerticalMark order={[...getInfo.getInfo.players]} />
+          <VerticalMark
+            order={[...getInfo.getInfo.players]}
+      
+          />
         </div>
       </div>
     </div>

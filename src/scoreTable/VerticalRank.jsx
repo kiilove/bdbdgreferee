@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useMemo } from "react";
 import { RiLock2Fill } from "react-icons/ri";
 
-const VerticalRank = ({ order, referee }) => {
+const VerticalRank = ({ order, referee, prevSetState }) => {
   const [scrollPosition, setScrollPosition] = useState(0);
 
   const [scoreCards, setScoreCards] = useState([]);
@@ -125,7 +125,7 @@ const VerticalRank = ({ order, referee }) => {
         // 신규 채점자라고 판단하고 해당 등수 오너로 설정
         // 점수표부터 수정
         // 스프레드로 수정하고 splice로 scoreCards 배열 정리
-        console.log("여긴왔어", scoreInfo.scoreOwner);
+
         const newScoreCard = { ...scoreInfo.scoreCard, playerRank: value };
         console.log(scoreInfo.scoreCard);
         const prevScoreCards = [...scoreCards]; // state값이지 함수 리턴값이 아님
@@ -201,6 +201,8 @@ const VerticalRank = ({ order, referee }) => {
       ),
     [scoreCards, scoreEndPlayers, scoreOwners]
   );
+
+  useMemo(() => prevSetState([...scoreCards]), [scoreCards]);
 
   return (
     scoreCards.length > 0 && (

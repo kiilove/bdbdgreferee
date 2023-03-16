@@ -40,6 +40,7 @@ const useFirestore = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log(documents);
       setData(documents);
       setLoading(false);
     } catch (error) {
@@ -53,7 +54,6 @@ const useFirestore = () => {
       const docRef = await addDoc(collection(db, collectionName), newData);
       const addedData = { id: docRef.id, ...newData };
       callback && callback();
-      navigate("/successpage", { replace: true });
     } catch (error) {
       setError(error);
     }
