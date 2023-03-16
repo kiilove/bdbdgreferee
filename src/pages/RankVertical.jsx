@@ -4,12 +4,9 @@ import { useState } from "react";
 import VerticalMark from "../scoreTable/VerticalMark";
 import VerticalRank from "../scoreTable/VerticalRank";
 
-const ScoreVertical = (getInfo, selectedType) => {
+const RankVertical = (getInfo, selectedType) => {
   const [scoreData, setScoreData] = useState([]);
   const [scoreBoardType, setScoreBoardType] = useState(selectedType);
-
-  console.log(getInfo);
-  console.log(selectedType);
 
   return (
     <div className="flex w-full justify-start items-start mb-44">
@@ -81,11 +78,14 @@ const ScoreVertical = (getInfo, selectedType) => {
           </div>
         </div>
         <div className="flex w-full h-full">
-          <VerticalMark order={[...getInfo.getInfo.players]} />
+          <VerticalRank
+            order={[...getInfo.getInfo.players]}
+            referee={getInfo.getInfo.referee}
+          />
         </div>
       </div>
     </div>
   );
 };
 
-export default ScoreVertical;
+export default RankVertical;

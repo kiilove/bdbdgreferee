@@ -113,17 +113,6 @@ const VerticalMark = (props) => {
       dummyScore = { ...dummyScore, [title]: 0 };
     });
 
-    // playersArray.map((item, idx) => {
-    //   const player = {
-    //     playerUid: item.playerUid,
-    //     playerName: item.playerName,
-    //     playerNumber: item.playerNumber,
-    //     score: dummyScore,
-    //   };
-    //   dummy.push(player);
-    //   dummySum.push(0);
-    // });
-
     props.order.map((item, idx) => {
       const player = {
         playerUid: item.pId,

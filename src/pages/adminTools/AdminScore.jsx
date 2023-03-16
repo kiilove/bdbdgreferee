@@ -5,11 +5,15 @@ import { useState } from "react";
 import { useEffect } from "react";
 import useFirestore from "../../customHooks/useFirestore";
 import useFirestoreSearch from "../../customHooks/useFirestoreSearch";
+import VerticalMark from "../../scoreTable/VerticalMark";
+import VerticalRank from "../../scoreTable/VerticalRank";
+import RankVertical from "../RankVertical";
 import ScoreVertical from "../ScoreVertical";
 
 const AdminScore = () => {
   const [getCups, setGetCups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState("랭킹형");
   const [selectedCup, setSelectedCup] = useState({});
   const [selectedClasses, setSelectedClasses] = useState({});
   const [selectedReferee, setSelectedReferee] = useState({});
@@ -152,7 +156,7 @@ const AdminScore = () => {
           <div className="flex w-1/3 flex-col">
             <div className="flex w-full h-20 gap-x-2">
               {getCups.map((cup, cIdx) => (
-                <div className="flex h-20 justify-center items-center text-white">
+                <div className="flex h-20 justify-center items-center text-white gap-1">
                   {selectedCup.index === cIdx ? (
                     <button
                       className="flex bg-white text-blue-800 py-3 px-5 rounded-md border border-blue-800 hover:bg-white hover:text-blue-800"
@@ -170,6 +174,21 @@ const AdminScore = () => {
                       }
                     >
                       {cup.cupInfo.cupName}
+                    </button>
+                  )}
+                  {selectedType === "점수형" ? (
+                    <button
+                      className="flex bg-white text-blue-800 py-3 px-5 rounded-md border border-blue-800 hover:bg-white hover:text-blue-800"
+                      onClick={() => setSelectedType("랭킹형")}
+                    >
+                      점수형
+                    </button>
+                  ) : (
+                    <button
+                      className="flex bg-white text-blue-800 py-3 px-5 rounded-md border border-blue-800 hover:bg-white hover:text-blue-800"
+                      onClick={() => setSelectedType("점수형")}
+                    >
+                      랭킹형
                     </button>
                   )}
                 </div>
@@ -250,9 +269,14 @@ const AdminScore = () => {
               </div>
             </div>
           </div>
-          {selectedReferee.refUid && demoProps && (
+          {selectedReferee.refUid && demoProps && selectedType === "점수형" && (
             <div className="flex w-full h-full ">
-              <ScoreVertical getInfo={demoProps} />
+              <ScoreVertical getInfo={demoProps} selectdType={selectedType} />
+            </div>
+          )}
+          {selectedReferee.refUid && demoProps && selectedType === "랭킹형" && (
+            <div className="flex w-full h-full ">
+              <RankVertical getInfo={demoProps} selectdType={selectedType} />
             </div>
           )}
         </div>
