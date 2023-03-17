@@ -1,303 +1,332 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { where } from "firebase/firestore";
 
-import { useMemo } from "react";
-import { useState } from "react";
-import { useEffect } from "react";
 import useFirestore from "../../customHooks/useFirestore";
 import useFirestoreSearch from "../../customHooks/useFirestoreSearch";
-import RankingBoard from "../RankingBoard";
-import ScoreVertical from "../ScoreVertical";
+import Header from "../../components/Header";
 
 const AdminReport = () => {
-  const [getCups, setGetCups] = useState([]);
+  const [cupId, setCupId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState("랭킹형");
-  const [selectedCup, setSelectedCup] = useState({});
-  const [selectedClasses, setSelectedClasses] = useState({});
-  const [selectedReferee, setSelectedReferee] = useState({});
-  const [enableReferee, setEnableReferee] = useState([]);
-  const [enableClasses, setEnableClasses] = useState([]);
-  const [enableReportList, setEnableReportList] = useState([]);
-  const [reportListSort, setReportListSort] = useState([]);
-  const [demoProps, setDemoProps] = useState({});
-
-  const { data: getAdminData, readData: cupReadDatas } = useFirestore();
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groupedData, setGroupedData] = useState(null);
+  const [rankingTableKey, setRankingTableKey] = useState(null);
   const { data: getRankBoard, readData: rankBoardReadDatas } = useFirestore();
   const conditions = [where("cupInfo.cupState", "==", "대회중")];
   const getCupDatasWithState = useFirestoreSearch("cups", conditions);
 
-  const handleRefreeList = (data) => {
-    const referees = Object.values(data.gamesCategory).reduce((acc, cur) => {
-      return acc.concat(cur.refereeAssign);
-    }, []);
-
-    const uniqueReferees = [
-      ...new Set(
-        referees.filter(
-          (r) =>
-            r !== undefined &&
-            r.refUid !== undefined &&
-            r.refUid !== null &&
-            r.refUid !== ""
-        )
-      ),
-    ];
-
-    const uniqueRefereesByUid = [
-      ...new Set(
-        uniqueReferees
-          .filter(
-            (r) =>
-              r &&
-              r.refUid !== undefined &&
-              r.refUid !== null &&
-              r.refUid !== ""
-          )
-          .map((r) => r.refUid)
-      ),
-    ].map((uid) => uniqueReferees.find((r) => r.refUid === uid));
-
-    return uniqueRefereesByUid;
+  const handleGroupChange = (key) => {
+    setSelectedGroup(key);
+    setRankingTableKey(key);
   };
 
-  const fiterIsEntryRefereeList = (data, categoryId) => {
-    if (!data.length || !categoryId) {
-      return;
-    }
-    const category = data[selectedCup.index].gamesCategory.find(
-      (category) => category.id === categoryId
-    );
+  const gamesGroup = (data) => {
+    const groupedData = data.reduce((acc, item) => {
+      const key = `${item.refGameTitle}/${item.refClassTitle}`;
 
-    if (!category || !category.refereeAssign) {
-      return [];
-    }
+      if (!acc[key]) {
+        acc[key] = [];
+      }
 
-    const refereeAssigns = category.refereeAssign;
-
-    return {
-      refereeTotal: [...refereeAssigns],
-      refereeLength: refereeAssigns.length,
-    };
+      acc[key].push(item);
+      return acc;
+    }, {});
+    setGroupedData(groupedData);
+    console.log(groupedData);
   };
-
-  const filterIsEntryGamesList = (data) => {
-    console.log(data);
-    if (!data.id) {
-      return;
-    }
-
-    const validClasses = data.gamesCategory.flatMap((category) =>
-      category.class.flatMap((classItem) => {
-        if (Array.isArray(classItem.players) && classItem.players.length > 0) {
-          return {
-            id: category.id,
-            class: classItem,
-            gameTitle: category.title,
-            classTitle: classItem.title,
-          };
-        }
-        return [];
-      })
-    );
-    console.log(validClasses);
-    return validClasses;
-  };
-
-  useMemo(() => {
-    setEnableReferee(fiterIsEntryRefereeList(getCups, selectedClasses.id));
-  }, [selectedClasses.id]);
-
-  useMemo(() => {
-    console.log(selectedCup);
-    if (!getCups.length || selectedCup.cupId === undefined) {
-      return;
-    }
-    setEnableClasses(filterIsEntryGamesList(getCups[selectedCup.index]));
-    console.log(filterIsEntryGamesList(getCups[selectedCup.index]));
-  }, [selectedCup]);
-
-  useMemo(() => {
-    if (!getCups.length) {
-      return;
-    }
-    rankBoardReadDatas("rankingboard");
-  }, [getCups]);
-
-  useMemo(() => {
-    if (!enableClasses || !getCups.length || !enableReferee) {
-      return;
-    }
-    console.log(selectedClasses.index);
-    setDemoProps({
-      cupId: selectedCup.cupId,
-      gamesCategoryId: selectedClasses.id,
-      players: [...enableClasses[selectedClasses.index].class.players],
-      playersLength: [...enableClasses[selectedClasses.index].class.players]
-        .length,
-
-      cupData: { ...getCups[selectedCup.index] },
-      gameData: { ...enableClasses[selectedClasses.index] },
-      classTitle: selectedClasses.classTitle,
-      refereeLength: enableReferee.refereeLength,
-      refereeTotal: [...enableReferee.refereeTotal],
-    });
-  }, [selectedCup, selectedClasses.classTitle]);
 
   useEffect(() => {
-    if (!getCupDatasWithState.data.length) {
-      return;
+    if (cupId) {
+      setIsLoading(false);
+      rankBoardReadDatas("rankingboard");
     }
-    setGetCups([...getCupDatasWithState.data]);
+  }, [cupId]);
+
+  useEffect(() => {
+    if (getCupDatasWithState.data.length === 1) {
+      setCupId(getCupDatasWithState.data[0].id);
+    }
   }, [getCupDatasWithState.data]);
 
-  useMemo(() => {
-    if (!demoProps.cupId) {
-      return;
+  useEffect(() => {
+    if (getRankBoard.length !== 0) {
+      gamesGroup(getRankBoard);
     }
+  }, [getRankBoard]);
 
-    console.log("demo", demoProps);
-  }, [demoProps]);
+  // const RankingTable = ({ data }) => {
+  //   const rows = Array.from(Array(3), (_, i) => i + 1);
+  //   const columns = Array.from(Array(4), (_, i) => i + 1);
+  //   const tableData = rows.map((row) =>
+  //     columns.map((column) => {
+  //       const match = data.find(
+  //         (item) => item.playerNumber === row && item.refSeatIndex === column
+  //       );
+  //       return match ? match.playerRank : null;
+  //     })
+  //   );
 
-  useMemo(() => {
-    if (!getRankBoard.length) {
-      return;
-    }
-    console.log(
-      demoProps.cupId,
-      demoProps.gamesCategoryId,
-      demoProps.classTitle
+  //   // 최저점수와 최고점수를 찾아 bg-color를 변경합니다.
+  //   const rowBgColors = rows.map((row) => {
+  //     const ranks = columns
+  //       .map((column) => {
+  //         const match = data.find(
+  //           (item) => item.playerNumber === row && item.refSeatIndex === column
+  //         );
+  //         return match ? match.playerRank : null;
+  //       })
+  //       .filter((rank) => rank !== null);
+
+  //     const minRank = Math.min(...ranks);
+  //     const maxRank = Math.max(...ranks);
+
+  //     const bgColors = ranks.map((rank, index) => {
+  //       if (rank === maxRank && !ranks.slice(0, index).includes(maxRank)) {
+  //         return "bg-red-500";
+  //       } else if (
+  //         rank === minRank &&
+  //         !ranks.slice(0, index).includes(minRank)
+  //       ) {
+  //         return "bg-blue-500";
+  //       } else {
+  //         return "";
+  //       }
+  //     });
+
+  //     return bgColors;
+  //   });
+
+  //   // 전체 점수에서 최고점과 최저점을 뺀 합계를 구합니다.
+  //   const totals = rows.map((row) => {
+  //     const ranks = columns
+  //       .map((column) => {
+  //         const match = data.find(
+  //           (item) => item.playerNumber === row && item.refSeatIndex === column
+  //         );
+  //         return match ? match.playerRank : null;
+  //       })
+  //       .filter((rank) => rank !== null);
+
+  //     const minRank = Math.min(...ranks);
+  //     const maxRank = Math.max(...ranks);
+
+  //     const sum = ranks.reduce((acc, rank) => acc + rank, 0);
+  //     const total = sum - minRank - maxRank;
+
+  //     return total;
+  //   });
+
+  //   // tableData와 rowBgColors를 이용해 집계표를 렌더링합니다.
+  //   return (
+  //     <table>
+  //       <thead>
+  //         <tr>
+  //           <th></th>
+  //           {columns.map((column) => (
+  //             <th key={column}>심판 {column}</th>
+  //           ))}
+  //           <th>합계</th>
+  //         </tr>
+  //       </thead>
+  //       <tbody>
+  //         {rows.map((row, i) => (
+  //           <tr key={row}>
+  //             <th> {row}</th>
+  //             {columns.map((column, j) => (
+  //               <td key={`${i}-${j}`} className={rowBgColors[i][j]}>
+  //                 {tableData[i][j]}
+  //               </td>
+  //             ))}
+  //             <td>{totals[i]}</td>
+  //           </tr>
+  //         ))}
+  //       </tbody>
+  //     </table>
+  //   );
+  // };
+
+  const RankingTable = ({ data }) => {
+    const playerNumbers = [...new Set(data.map((item) => item.playerNumber))];
+    const refSeatIndexes = [
+      ...new Set(data.map((item) => item.refSeatIndex)),
+    ].sort();
+
+    const rankData = playerNumbers.map((playerNumber) =>
+      refSeatIndexes.map((refSeatIndex) => {
+        const match = data.find(
+          (item) =>
+            item.playerNumber === playerNumber &&
+            item.refSeatIndex === refSeatIndex
+        );
+        return match ? match.playerRank : null;
+      })
     );
-    const fiterByClasses = getRankBoard.filter(
-      (filter) =>
-        filter.refCupId === demoProps.cupId &&
-        filter.refGameId === demoProps.gamesCategoryId &&
-        filter.refClassTitle === demoProps.classTitle
-    );
 
-    const uniqueClassTitles = new Set(
-      fiterByClasses.map((result) => result.refClassTitle)
-    );
-    const uniqueClassTitleArray = Array.from(uniqueClassTitles);
-    console.log(uniqueClassTitleArray);
-    setEnableReportList(fiterByClasses);
-    console.log(fiterByClasses);
-    setIsLoading(false);
-  }, [getRankBoard, selectedClasses]);
+    const rowBgColors = playerNumbers.map((playerNumber) => {
+      const ranks = refSeatIndexes
+        .map((refSeatIndex) => {
+          const match = data.find(
+            (item) =>
+              item.playerNumber === playerNumber &&
+              item.refSeatIndex === refSeatIndex
+          );
+          return match ? match.playerRank : null;
+        })
+        .filter((rank) => rank !== null);
 
-  useMemo(() => {
-    if (!enableReportList.length) {
-      return;
-    }
-    console.log("지금 제일 중요", enableReportList);
-    const sortedArray = enableReportList.sort((a, b) => {
-      if (a.playerNumber !== b.playerNumber) {
-        return a.playerNumber - b.playerNumber; // playerNumber 오름차순 정렬
-      } else {
-        return a.refSeatIndex - b.refSeatIndex; // playerNumber가 같을 경우 refSeatIndex 오름차순 정렬
-      }
+      const minRank = Math.min(...ranks);
+      const maxRank = Math.max(...ranks);
+
+      const bgColors = ranks.map((rank, index) => {
+        if (rank === maxRank && !ranks.slice(0, index).includes(maxRank)) {
+          return "bg-red-200";
+        } else if (
+          rank === minRank &&
+          !ranks.slice(0, index).includes(minRank)
+        ) {
+          return "bg-blue-200";
+        } else {
+          return "";
+        }
+      });
+
+      return bgColors;
     });
-    setReportListSort([...sortedArray]);
-    const groupByPlayerNumber = (players) =>
-      players.reduce((result, player) => {
-        // playerNumber를 기준으로 그룹화된 객체를 생성
-        const group = result[player.playerNumber] || [];
-        // 그룹에 현재 player 객체를 추가
-        group.push(player);
-        // 그룹화된 객체를 result 객체에 추가
-        return { ...result, [player.playerNumber]: group };
-      }, {});
-    console.log(groupByPlayerNumber(enableReportList));
-  }, [enableReportList]);
 
-  useMemo(() => console.log(selectedClasses), [selectedClasses]);
+    const totals = playerNumbers.map((playerNumber) => {
+      const ranks = refSeatIndexes
+        .map((refSeatIndex) => {
+          const match = data.find(
+            (item) =>
+              item.playerNumber === playerNumber &&
+              item.refSeatIndex === refSeatIndex
+          );
+          return match ? match.playerRank : null;
+        })
+        .filter((rank) => rank !== null);
+
+      const minRank = Math.min(...ranks);
+      const maxRank = Math.max(...ranks);
+
+      const sum = ranks.reduce((acc, rank) => acc + rank, 0);
+      const total = sum - minRank - maxRank;
+
+      return total;
+    });
+
+    const sortedRankIndex = totals
+      .map((total, index) => [index, total])
+      .sort((a, b) => a[1] - b[1])
+      .map((item) => item[0]);
+
+    console.log(refSeatIndexes);
+    return (
+      <div className="flex p-3 border">
+        <table>
+          <thead>
+            <tr className="border-b">
+              <th className="w-20 h-10">순위</th>
+              <th className="w-20">선수번호</th>
+              {refSeatIndexes.map((refSeatIndex) => (
+                <th className="w-20" key={refSeatIndex}>
+                  심판 {refSeatIndex}
+                </th>
+              ))}
+              <th>기표합산</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedRankIndex.map((rowIndex, rank) => (
+              <tr key={rowIndex}>
+                <td className="w-20 h-10 text-center">{rank + 1}</td>
+                <td className="w-20 h-10 text-center">
+                  {playerNumbers[rowIndex]}
+                </td>
+                {refSeatIndexes.map((refSeatIndex, j) => {
+                  const index = data.findIndex(
+                    (item) =>
+                      item.playerNumber === playerNumbers[rowIndex] &&
+                      item.refSeatIndex === refSeatIndex
+                  );
+                  return (
+                    <td
+                      key={`${rowIndex}-${j}`}
+                      className={`${rowBgColors[rowIndex][j]} w-20 h-10 text-center`}
+                    >
+                      {index >= 0 ? data[index].playerRank : ""}
+                    </td>
+                  );
+                })}
+                <td className="w-20 h-10 text-center">{totals[rowIndex]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
-    <div className="flex w-full flex-col justify-start h-screen items-center px-5">
+    <div className="flex w-full flex-col justify-start h-screen items-center px-5 py-2">
       {isLoading && "로딩중...."}
-      {getCups.length && (
-        <div className="flex w-full h-20 bg-white">
-          <div className="flex w-1/3 flex-col">
-            <div className="flex w-full h-20 gap-x-2">
-              {getCups.map((cup, cIdx) => (
-                <div className="flex h-20 justify-center items-center text-white gap-1">
-                  {selectedCup.index === cIdx ? (
-                    <button
-                      className="flex bg-white text-blue-800 py-3 px-5 rounded-md border border-blue-800 hover:bg-white hover:text-blue-800"
-                      onClick={() =>
-                        setSelectedCup({ cupId: cup.id, index: cIdx })
-                      }
-                    >
-                      {cup.cupInfo.cupName}
-                    </button>
-                  ) : (
-                    <button
-                      className="flex bg-blue-600 py-3 px-5 rounded-md border border-green-800 hover:bg-white hover:text-blue-800"
-                      onClick={() =>
-                        setSelectedCup({ cupId: cup.id, index: cIdx })
-                      }
-                    >
-                      {cup.cupInfo.cupName}
-                    </button>
-                  )}
-                </div>
+      <div className="flex w-full h-20 justify-center">
+        <Header />
+      </div>
+      <div className="flex w-full gap-x-5">
+        <div className="flex w-1/4 h-10 border-blue-600 border">
+          <select
+            name="cupSelect"
+            onChange={(e) => {
+              setCupId((prev) => (prev = e.target.value));
+            }}
+          >
+            {!getCupDatasWithState.data.length ? (
+              <option>진행중인 대회정보 로딩중...</option>
+            ) : (
+              getCupDatasWithState.data.map((cup, cidx) => (
+                <option value={cup.id}>{cup.cupInfo.cupName}</option>
+              ))
+            )}
+          </select>
+        </div>
+
+        <div className="flex gap-x-5 flex-wrap w-2/3">
+          {!groupedData ? (
+            "종목 불러오는중"
+          ) : (
+            <div className="flex justify-center items-center gap-x-2">
+              {Object.keys(groupedData).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => handleGroupChange(key)}
+                  disabled={selectedGroup === key}
+                  className="flex p-2 bg-pink-300 rounded-md"
+                >
+                  {key}
+                </button>
               ))}
-            </div>
-            <div className="flex justify-start items-start h-full gap-x-1">
-              <div className="flex w-72 gap-x-2 flex-wrap">
-                <div className="flex w-full flex-wrap gap-1">
-                  {getRankBoard &&
-                    enableClasses.map((classes, cIdx) => (
-                      <div className="flex justify-center items-center text-white text-sm">
-                        {selectedClasses.index === cIdx ? (
-                          <button
-                            className="flex w-32 bg-white text-pink-800 py-1 px-2 rounded-md border border-pink-800 hover:bg-white hover:text-pink-800"
-                            onClick={() =>
-                              setSelectedClasses({
-                                id: classes.id,
-                                index: cIdx,
-                                classTitle: classes.classTitle,
-                              })
-                            }
-                          >
-                            <div className="flex flex-col">
-                              <h3>{classes.gameTitle}</h3>
-                              <h3>{classes.classTitle}</h3>
-                            </div>
-                          </button>
-                        ) : (
-                          <button
-                            className="flex w-32 bg-pink-600 py-1 px-2 rounded-md border border-pink-800 hover:bg-white hover:text-pink-800"
-                            onClick={() =>
-                              setSelectedClasses({
-                                id: classes.id,
-                                index: cIdx,
-                                classTitle: classes.classTitle,
-                              })
-                            }
-                          >
-                            <div className="flex flex-col">
-                              <h3>{classes.gameTitle}</h3>
-                              <h3>{classes.classTitle}</h3>
-                            </div>
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
-              <div className="flex w-32 h-full gap-x-1 flex-col items-start gap-1 justify-start "></div>
-            </div>
-          </div>
-          {reportListSort.length && (
-            <div className="flex flex-col w-full h-full">
-              {reportListSort.map((report, idx) => (
-                <div className="flex">{report.playerNumber}</div>
-              ))}
+              {selectedGroup && (
+                <ul>
+                  {groupedData[selectedGroup].map((item) => (
+                    <li key={item.id}>{item.name}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
+      <div className="flex w-full mt-5 justify-center items-center ">
+        {selectedGroup && (
+          <div className="flex flex-col box-border overflow-y-auto p-10 rounded-md w-full h-full">
+            <h1>{selectedGroup}</h1>
+            <RankingTable
+              key={rankingTableKey}
+              data={groupedData[selectedGroup]}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

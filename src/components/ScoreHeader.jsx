@@ -13,6 +13,7 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
   const [scoreBoardType, setScoreBoardType] = useState(selectedType);
   const [scoreBoardData, setScoreBoardData] = useState([]);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { state, dispatch } = useContext(RankingBoardContext);
@@ -42,32 +43,35 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
   };
 
   const handleSaveRankingBoard = () => {
-    addData("rankingboard", state.rankingBoard);
+    setMessage({
+      title: "데이터전송",
+      body: "전송중입니다. 잠시만 기다려주세요",
+      isButton: false,
+      confirmButtonText: "",
+      cancelButtonText: "",
+    });
+    setIsModalOpen(true);
+    addData("rankingboard", state.rankingBoard, () => {
+      setMessage({
+        title: "데이터완료",
+        body: "제출이 완료되었습니다.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+    });
   };
-  // const handleSaveRankingBoard = async () => {
-  //   const rankboardCollectionRef = collection(db, "rankboard"); // cupsjoin 컬렉션 ref
-  //   for (const rank of state.rankingBoard) {
-  //     // 사용자 문서 추가
-  //     await addDoc(rankboardCollectionRef, rank);
-  //   }
-  // };
 
   const handleSavedConfirm = async () => {
     dispatch({ type: "COMPELETE" });
     setIsModalOpen(false);
-    navigate("/lobby", { replace: true });
+    //navigate("/lobby", { replace: true });
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
 
-  const message = {
-    title: "제출완료",
-    body: "정상적으로 저장되었습니다. 다음 경기를 위해 로비로 이동합니다. 경우에 따라서 다시 로그인이 필요하실 수 있습니다.",
-    confirmButtonText: "확인",
-    cancelButtonText: "",
-  };
   useMemo(() => console.log(state), [state]);
   return (
     <div
