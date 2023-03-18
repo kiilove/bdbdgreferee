@@ -243,7 +243,7 @@ const VerticalRank = ({ order, referee, prevSetState }) => {
             scoreCards.map((rank, rIdx) => (
               <div className="flex w-full h-full rounded-md gap-x-2">
                 <div className="flex w-24 flex-col gap-y-2 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
-                  <span className="text-sm font-semibold">
+                  <span className="text-3xl font-semibold">
                     {rank.playerNumber}
                   </span>
                 </div>

@@ -19,6 +19,15 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
   const { state, dispatch } = useContext(RankingBoardContext);
   const navigate = useNavigate();
 
+  const isReadyToSubmit = useMemo(() => {
+    const isValidRankingBoard =
+      state.rankingBoard.length > 0 &&
+      state.rankingBoard.every((data) =>
+        Object.values(data).every((val) => !!val)
+      );
+    return isValidRankingBoard;
+  }, [state.rankingBoard]);
+
   const generateDocuId = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
     const timestamp = Date.now().toString().substr(-4);
@@ -43,6 +52,11 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
   };
 
   const handleSaveRankingBoard = () => {
+    if (!isReadyToSubmit) {
+      setError("저장할 수 없는 상태입니다.");
+      return;
+    }
+
     setMessage({
       title: "데이터전송",
       body: "전송중입니다. 잠시만 기다려주세요",
@@ -74,17 +88,14 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
 
   useMemo(() => console.log(state), [state]);
   return (
-    <div
-      className="flex w-full gap-x-5 sticky top-0"
-      style={{ height: "150px" }}
-    >
+    <div className="flex w-full sticky top-0" style={{ height: "150px" }}>
       <ConfirmationModal
         isOpen={isModalOpen}
         onConfirm={handleSavedConfirm}
         onCancel={handleModalClose}
         message={message}
       />
-      <div className="flex w-full bg-slate-100 p-1 rounded-lg justify-between flex-wrap gap-y-2">
+      <div className="flex w-full bg-slate-100 p-1 rounded-lg justify-between flex-wrap gap-y-2 ">
         <div className="flex w-2/5 flex-col gap-y-2 p-1">
           <div className="flex w-full bg-slate-800 px-3 rounded-lg h-9 justify-start items-center">
             <p className="text-white text-sm">
@@ -128,16 +139,21 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
             </p>
           </div>
         </div>
-        <div className="flex w-1/5 flex-col p-1">
+        <div className="flex w-1/5 flex-col p-1 gap-y-2">
           <div className="flex w-full h-full bg-slate-800 p-2 rounded-lg justify-start items-center flex-col gap-y-1">
             <div className="flex bg-slate-400 w-full h-full rounded-lg justify-center items-center">
               <span className=" text-2xl font-bold">서명</span>
             </div>
             <button
-              className="flex bg-slate-400 w-full h-full rounded-lg justify-center items-center"
+              className={`${
+                !isReadyToSubmit ? "bg-yellow-500 " : "bg-red-500 "
+              }flex w-full h-full rounded-lg justify-center items-center`}
+              disabled={!isReadyToSubmit}
               onClick={() => handleSaveRankingBoard()}
             >
-              <span className=" text-2xl font-bold">제출</span>
+              <span className=" text-2xl font-bold">
+                {!isReadyToSubmit ? "채점중" : "제출"}
+              </span>
             </button>
           </div>
         </div>

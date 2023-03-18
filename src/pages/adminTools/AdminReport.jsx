@@ -225,8 +225,8 @@ const AdminReport = () => {
         <table>
           <thead>
             <tr className="border-b">
-              <th className="w-20 h-10">순위</th>
-              <th className="w-20">선수번호</th>
+              <th className="w-20 text-lg">선수번호</th>
+              <th className="w-20 h-10 text-lg">순위</th>
               {refSeatIndexes.map((refSeatIndex) => (
                 <th className="w-20" key={refSeatIndex}>
                   심판 {refSeatIndex}
@@ -238,9 +238,11 @@ const AdminReport = () => {
           <tbody>
             {sortedRankIndex.map((rowIndex, rank) => (
               <tr key={rowIndex}>
-                <td className="w-20 h-10 text-center">{rank + 1}</td>
-                <td className="w-20 h-10 text-center">
+                <td className="w-20 h-10 text-center font-semibold">
                   {playerNumbers[rowIndex]}
+                </td>
+                <td className="w-20 h-10 text-center text-lg font-semibold">
+                  {rank + 1}
                 </td>
                 {refSeatIndexes.map((refSeatIndex, j) => {
                   const index = data.findIndex(

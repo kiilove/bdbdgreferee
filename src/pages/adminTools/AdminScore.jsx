@@ -1,11 +1,19 @@
-import { where } from "firebase/firestore";
-import React from "react";
+import {
+  Firestore,
+  where,
+  get,
+  query,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+import React, { useCallback } from "react";
 import { useMemo } from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import Header from "../../components/Header";
 import useFirestore from "../../customHooks/useFirestore";
 import useFirestoreSearch from "../../customHooks/useFirestoreSearch";
+import { db } from "../../firebase";
 import RankingBoard from "../RankingBoard";
 import ScoreVertical from "../ScoreVertical";
 
@@ -19,6 +27,7 @@ const AdminScore = () => {
   const [enableReferee, setEnableReferee] = useState([]);
   const [enableClasses, setEnableClasses] = useState([]);
   const [demoProps, setDemoProps] = useState({});
+  const [refereeExists, setRefereeExists] = useState(false);
 
   const { data: getAdminData, readData: cupReadDatas } = useFirestore();
   const conditions = [where("cupInfo.cupState", "==", "대회중")];
@@ -118,6 +127,7 @@ const AdminScore = () => {
   }, [selectedCup]);
 
   useMemo(() => {
+    console.log(getCups);
     if (!getCups.length) {
       return;
     }
@@ -141,11 +151,25 @@ const AdminScore = () => {
   }, [selectedCup, selectedClasses, selectedReferee]);
 
   useEffect(() => {
+    console.log(getCupDatasWithState.data);
     if (!getCupDatasWithState.data.length) {
       return;
     }
     setGetCups([...getCupDatasWithState.data]);
   }, [getCupDatasWithState.data]);
+
+  const isScoredReferee = async (refUid, refCupId, refGameId) => {
+    const q = query(
+      collection(db, "rankingboard"),
+      where("refCupId", "==", refCupId),
+      where("refGameId", "==", refGameId),
+      where("refrefereeUid", "==", refUid)
+    );
+
+    const rankSnapshot = await getDocs(q);
+    console.log(refUid, refCupId, refGameId);
+    return rankSnapshot.empty;
+  };
 
   return (
     <div className="flex w-full flex-col justify-start h-screen items-center px-5">
@@ -244,6 +268,11 @@ const AdminScore = () => {
                       {selectedReferee.index === rIdx ? (
                         <button
                           className="flex w-32 bg-white text-green-800 py-3 px-5 rounded-md border border-green-800 hover:bg-white hover:text-green-800"
+                          disabled={isScoredReferee(
+                            referee.refUid,
+                            demoProps.cupId,
+                            demoProps.gameId
+                          )}
                           onClick={() =>
                             setSelectedReferee({
                               refUid: referee.refUid,

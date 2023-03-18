@@ -8,7 +8,6 @@ import { useContext } from "react";
 import { RankingBoardContext } from "../context/RankingBoardContext";
 
 const RankingBoard = ({ getInfo, selectedType }) => {
-  console.log(getInfo);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [scoreCardPlayers, setScoreCardPlayers] = useState([]);
   const [scoreCards, setScoreCards] = useState([]);
@@ -22,7 +21,7 @@ const RankingBoard = ({ getInfo, selectedType }) => {
   };
   useEffect(() => {
     window.addEventListener("scroll", updateScroll);
-  });
+  }, []);
 
   const initForPlayer = (playerUid) => {
     const updatedOwners = scoreOwners.map((rank) => {
@@ -168,8 +167,6 @@ const RankingBoard = ({ getInfo, selectedType }) => {
     setScoreEndPlayers([]);
     setScoreOwners([]);
 
-    console.log(getInfo);
-
     getInfo.players.map((item, idx) => {
       const player = {
         playerUid: item.pId,
@@ -198,19 +195,6 @@ const RankingBoard = ({ getInfo, selectedType }) => {
     initRankBoard();
   }, [getInfo]);
 
-  // useMemo(
-  //   () =>
-  //     console.log(
-  //       "점수표",
-  //       scoreCards,
-  //       "선택된등수",
-  //       scoreOwners,
-  //       "채점완료된선수",
-  //       scoreEndPlayers
-  //     ),
-  //   [scoreCards, scoreEndPlayers, scoreOwners]
-  // );
-
   const makeScoreCard = () => {
     let dummy = [];
     scoreCards.map((rank) => {
@@ -230,13 +214,12 @@ const RankingBoard = ({ getInfo, selectedType }) => {
   useMemo(() => {
     const scoreCardArray = makeScoreCard();
     rankDispatch({ type: "NEW", payload: scoreCardArray });
-    //console.log(makeScoreCard());
   }, [scoreCards]);
   return (
     <div className="flex w-full justify-start items-start mb-44 flex-col">
       <div
         className="flex justify-start flex-col w-full"
-        style={{ maxWidth: "800px" }}
+        style={{ maxWidth: "850px" }}
       >
         <ScoreHeader getInfo={getInfo} />
 
@@ -277,12 +260,12 @@ const RankingBoard = ({ getInfo, selectedType }) => {
               scoreCards.map((rank, rIdx) => (
                 <div className="flex w-full h-full rounded-md gap-x-2">
                   <div className="flex w-24 flex-col gap-y-2 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
-                    <span className="text-sm font-semibold">
+                    <span className="text-4xl font-semibold">
                       {rank.playerNumber}
                     </span>
                   </div>
-                  <div className="flex w-24 justify-center items-center bg-green-400 rounded-lg border border-gray-200">
-                    <span className="text-2xl">
+                  <div className="flex w-24 font-semibold justify-center items-center bg-green-400 rounded-lg border border-gray-200">
+                    <span className="text-4xl">
                       {rank.playerRank === 0 ? "" : rank.playerRank}
                     </span>
                   </div>
@@ -307,7 +290,7 @@ const RankingBoard = ({ getInfo, selectedType }) => {
                         scoreOwners.map((owner, oIdx) =>
                           rank.playerUid === owner.owner ? (
                             <button
-                              className="flex w-12 h-12 p-2 rounded-md border border-green-300 justify-center items-center bg-green-500 text-black"
+                              className="flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center bg-green-500 text-black"
                               value={parseInt(owner.value)}
                               onClick={(e) =>
                                 handleRankingBoard(
@@ -320,14 +303,14 @@ const RankingBoard = ({ getInfo, selectedType }) => {
                             </button>
                           ) : owner.selected ? (
                             <button
-                              className="flex w-12 h-12 p-2 rounded-md border border-green-300 justify-center items-center text-black"
+                              className="flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center text-black"
                               disabled
                             >
                               <RiLock2Fill className="text-gray-500" />
                             </button>
                           ) : (
                             <button
-                              className="flex w-12 h-12 p-2 rounded-md border border-green-300 justify-center items-center text-black"
+                              className="flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center text-black bg-yellow-300 text-2xl"
                               value={parseInt(owner.value)}
                               onClick={(e) =>
                                 handleRankingBoard(

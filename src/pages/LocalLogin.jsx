@@ -31,12 +31,12 @@ const LocalLogin = () => {
 
     await signInWithEmailAndPassword(
       auth,
-      loginEmailRef.current.value,
-      loginPasswordRef.current.value
+      loginEmailRef.current.value.trim(),
+      loginPasswordRef.current.value.trim()
     )
       .then((user) => {
         const userInfo = user;
-        
+
         dispatch({ type: "LOGIN", payload: userInfo });
       })
       .then(() => navigate("/lobby"))
@@ -75,6 +75,11 @@ const LocalLogin = () => {
             value={loginInfo.refPassword}
             className="w-full h-12 rounded-md focus:ring-0 focus:outline-orange-400 border border-gray-400 px-5 font-light"
             placeholder="비밀번호"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleLogin();
+              }
+            }}
           />
         </div>
 

@@ -89,13 +89,7 @@ const QrLogin = () => {
         <div className="flex w-full h-full justify-center items-center p-20 box-border">
           <div className="flex w-3/4 h-3/4 rounded-lg border-4 border-dashed border-green-500 flex-col p-10 justify-center items-center gap-y-3">
             <p className=" text-lg font-semibold text-gray-500">안녕하세요!</p>
-            <p className=" text-lg text-gray-500">
-              현재 심사준비중인 종목은
-              <span className="text-lg font-bold text-black mx-3">
-                남자 일반부 -90Kg
-              </span>
-              입니다.
-            </p>
+
             <p className=" text-lg text-gray-500">
               원활한 경기 진행을 위해 심판 로그인이 필요합니다.
             </p>
