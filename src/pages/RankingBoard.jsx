@@ -215,6 +215,11 @@ const RankingBoard = ({ getInfo, selectedType }) => {
     const scoreCardArray = makeScoreCard();
     rankDispatch({ type: "NEW", payload: scoreCardArray });
   }, [scoreCards]);
+
+  useEffect(() => {
+    console.log(getInfo);
+  }, [getInfo]);
+
   return (
     <div className="flex w-full justify-start items-start mb-44 flex-col">
       <div

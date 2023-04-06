@@ -10,6 +10,8 @@ import VerticalRank from "./scoreTable/VerticalRank";
 import AdminScore from "./pages/adminTools/AdminScore";
 import AdminLobby from "./pages/adminTools/AdminLobby";
 import AdminReport from "./pages/adminTools/AdminReport";
+import MachineCheck from "./pages/MachineCheck";
+import ScoreDemo from "./pages/adminTools/ScoreDemo";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -20,14 +22,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <RequireAuth>
-              <Lobby />
-            </RequireAuth>
-          }
-        />
+        <Route path="/" element={<MachineCheck />} />
+        <Route path="/rankingdemo" element={<ScoreDemo />} />
         <Route path="/login" element={<Login />} />
 
         <Route

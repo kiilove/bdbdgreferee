@@ -86,7 +86,6 @@ const ScoreHeader = ({ getInfo, selectedType }) => {
     setIsModalOpen(false);
   };
 
-  useMemo(() => console.log(state), [state]);
   return (
     <div className="flex w-full sticky top-0" style={{ height: "150px" }}>
       <ConfirmationModal
