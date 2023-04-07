@@ -23,19 +23,27 @@ const MachineCheck = () => {
     }
   };
   return (
-    <div className="w-full h-screen flex justify-center items-center flex-col gap-y-8">
-      <div className="flex w-full h-20 justify-center font-extrabold">
-        <span style={{ fontSize: "150px" }}>좌석번호</span>
+    <div className="w-full h-screen flex justify-center items-center flex-col gap-y-2">
+      <div className="flex w-full justify-center font-extrabold ">
+        <span style={{ fontSize: "30px" }}>
+          물맑은 양평 보디빌딩&피트니스대회
+        </span>
       </div>
-      <div className="flex w-full justify-center items-center h-full">
+      <div className="flex w-full justify-center font-extrabold ">
+        <span style={{ fontSize: "40px" }}>남자 일반부 / -65kg</span>
+      </div>
+      <div className="flex w-full justify-center font-extrabold">
+        <span style={{ fontSize: "100px" }}>좌석번호</span>
+      </div>
+      <div className="flex w-full justify-center items-center">
         <span
           className="text-green-800 font-san font-extrabold"
-          style={{ fontSize: "220px" }}
+          style={{ fontSize: "200px" }}
         >
           4
         </span>
       </div>
-      <div className="flex w-full justify-center items-center h-20 gap-x-4">
+      <div className="flex w-full justify-center items-center gap-x-4 ">
         <input
           type="text"
           maxLength="1"
@@ -96,7 +104,7 @@ const MachineCheck = () => {
       <div>
         <span className="text-2xl text-orange-500 h-20">{pinMessage}</span>
       </div>
-      <div className="flex w-full h-32 justify-center items-center bg-green-600">
+      <div className="flex w-full h-20 justify-center items-center bg-green-600">
         <button onClick={() => handlePinCheck()}>
           <span className="text-3xl font-semibold text-white">로그인</span>
         </button>

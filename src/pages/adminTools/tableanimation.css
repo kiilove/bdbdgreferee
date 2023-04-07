@@ -1,0 +1,14 @@
+.table-row-wrapper {
+  animation: slide-in 0.5s ease;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

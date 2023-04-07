@@ -4,13 +4,16 @@ import { where } from "firebase/firestore";
 import useFirestore from "../../customHooks/useFirestore";
 import useFirestoreSearch from "../../customHooks/useFirestoreSearch";
 import Header from "../../components/Header";
+import "./tableanimation.css";
 
-const AdminReport = () => {
+const AdminReportDemo = () => {
   const [cupId, setCupId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupedData, setGroupedData] = useState(null);
   const [rankingTableKey, setRankingTableKey] = useState(null);
+  const [animationIndex, setAnimationIndex] = useState(null);
+  const [animationStarted, setAnimationStarted] = useState(false);
   const { data: getRankBoard, readData: rankBoardReadDatas } = useFirestore();
   const conditions = [where("cupInfo.cupState", "==", "대회중")];
   const getCupDatasWithState = useFirestoreSearch("cups", conditions);
@@ -21,7 +24,7 @@ const AdminReport = () => {
   };
 
   const gamesGroup = (data) => {
-    const groupedData = data.reduce((acc, item) => {
+    const groupData = data.reduce((acc, item) => {
       const key = `${item.refGameTitle}/${item.refClassTitle}`;
 
       if (!acc[key]) {
@@ -31,119 +34,29 @@ const AdminReport = () => {
       acc[key].push(item);
       return acc;
     }, {});
-    setGroupedData(groupedData);
+    setGroupedData(groupData);
     console.log(groupedData);
   };
 
   useEffect(() => {
-    if (cupId) {
+    console.log(getCupDatasWithState);
+    if (getCupDatasWithState.data.length) {
       setIsLoading(false);
-      rankBoardReadDatas("rankingboarddemo");
-    }
-  }, [cupId]);
-
-  useEffect(() => {
-    if (getCupDatasWithState.data.length === 1) {
       setCupId(getCupDatasWithState.data[0].id);
+      rankBoardReadDatas("rankingboarddemo");
     }
   }, [getCupDatasWithState.data]);
 
   useEffect(() => {
     if (getRankBoard.length !== 0) {
+      console.log(getRankBoard);
       gamesGroup(getRankBoard);
     }
   }, [getRankBoard]);
 
-  // const RankingTable = ({ data }) => {
-  //   const rows = Array.from(Array(3), (_, i) => i + 1);
-  //   const columns = Array.from(Array(4), (_, i) => i + 1);
-  //   const tableData = rows.map((row) =>
-  //     columns.map((column) => {
-  //       const match = data.find(
-  //         (item) => item.playerNumber === row && item.refSeatIndex === column
-  //       );
-  //       return match ? match.playerRank : null;
-  //     })
-  //   );
-
-  //   // 최저점수와 최고점수를 찾아 bg-color를 변경합니다.
-  //   const rowBgColors = rows.map((row) => {
-  //     const ranks = columns
-  //       .map((column) => {
-  //         const match = data.find(
-  //           (item) => item.playerNumber === row && item.refSeatIndex === column
-  //         );
-  //         return match ? match.playerRank : null;
-  //       })
-  //       .filter((rank) => rank !== null);
-
-  //     const minRank = Math.min(...ranks);
-  //     const maxRank = Math.max(...ranks);
-
-  //     const bgColors = ranks.map((rank, index) => {
-  //       if (rank === maxRank && !ranks.slice(0, index).includes(maxRank)) {
-  //         return "bg-red-500";
-  //       } else if (
-  //         rank === minRank &&
-  //         !ranks.slice(0, index).includes(minRank)
-  //       ) {
-  //         return "bg-blue-500";
-  //       } else {
-  //         return "";
-  //       }
-  //     });
-
-  //     return bgColors;
-  //   });
-
-  //   // 전체 점수에서 최고점과 최저점을 뺀 합계를 구합니다.
-  //   const totals = rows.map((row) => {
-  //     const ranks = columns
-  //       .map((column) => {
-  //         const match = data.find(
-  //           (item) => item.playerNumber === row && item.refSeatIndex === column
-  //         );
-  //         return match ? match.playerRank : null;
-  //       })
-  //       .filter((rank) => rank !== null);
-
-  //     const minRank = Math.min(...ranks);
-  //     const maxRank = Math.max(...ranks);
-
-  //     const sum = ranks.reduce((acc, rank) => acc + rank, 0);
-  //     const total = sum - minRank - maxRank;
-
-  //     return total;
-  //   });
-
-  //   // tableData와 rowBgColors를 이용해 집계표를 렌더링합니다.
-  //   return (
-  //     <table>
-  //       <thead>
-  //         <tr>
-  //           <th></th>
-  //           {columns.map((column) => (
-  //             <th key={column}>심판 {column}</th>
-  //           ))}
-  //           <th>합계</th>
-  //         </tr>
-  //       </thead>
-  //       <tbody>
-  //         {rows.map((row, i) => (
-  //           <tr key={row}>
-  //             <th> {row}</th>
-  //             {columns.map((column, j) => (
-  //               <td key={`${i}-${j}`} className={rowBgColors[i][j]}>
-  //                 {tableData[i][j]}
-  //               </td>
-  //             ))}
-  //             <td>{totals[i]}</td>
-  //           </tr>
-  //         ))}
-  //       </tbody>
-  //     </table>
-  //   );
-  // };
+  useEffect(() => {
+    console.log(groupedData);
+  }, [groupedData]);
 
   const RankingTable = ({ data }) => {
     const playerNumbers = [...new Set(data.map((item) => item.playerNumber))];
@@ -218,8 +131,8 @@ const AdminReport = () => {
       .map((total, index) => [index, total])
       .sort((a, b) => a[1] - b[1])
       .map((item) => item[0]);
-
-    console.log(refSeatIndexes);
+    const rankDisplayDelay = (sortedRankIndex.length - data.length + 5) * 1000; // rank display delay for animation
+    const rowDisplayDelay = rankDisplayDelay + 1000; // row display delay for animation
     return (
       <div className="flex p-3 border">
         <table>
@@ -236,8 +149,16 @@ const AdminReport = () => {
             </tr>
           </thead>
           <tbody>
-            {sortedRankIndex.map((rowIndex, rank) => (
-              <tr key={rowIndex}>
+            {sortedRankIndex.map((rowIndex, rank, index) => (
+              <tr
+                key={rowIndex}
+                className="table-row-wrapper"
+                style={{
+                  animationDelay: `${
+                    (sortedRankIndex.length - rank - 1) * 1000
+                  }ms`,
+                }}
+              >
                 <td className="w-20 h-10 text-center font-semibold">
                   {playerNumbers[rowIndex]}
                 </td>
@@ -274,30 +195,11 @@ const AdminReport = () => {
       <div className="flex w-full h-20 justify-center">
         <Header />
       </div>
-      <div className="flex w-full gap-x-5">
-        <div className="flex w-1/4 h-10 border-blue-600 border">
-          <select
-            name="cupSelect"
-            onChange={(e) => {
-              setCupId((prev) => (prev = e.target.value));
-            }}
-          >
-            {!getCupDatasWithState.data.length ? (
-              <option>진행중인 대회정보 로딩중...</option>
-            ) : (
-              getCupDatasWithState.data.map((cup, cidx) => (
-                <option value={cup.id}>{cup.cupInfo.cupName}</option>
-              ))
-            )}
-          </select>
-        </div>
-
-        <div className="flex gap-x-5 flex-wrap w-2/3">
-          {!groupedData ? (
-            "종목 불러오는중"
-          ) : (
+      <div className="flex w-full gap-x-5 flex-col">
+        <div className="flex gap-x-5 flex-wrap w-full">
+          {!isLoading && (
             <div className="flex justify-center items-center gap-x-2">
-              {Object.keys(groupedData).map((key) => (
+              {Object.keys(groupedData || {}).map((key) => (
                 <button
                   key={key}
                   onClick={() => handleGroupChange(key)}
@@ -317,20 +219,21 @@ const AdminReport = () => {
             </div>
           )}
         </div>
-      </div>
-      <div className="flex w-full mt-5 justify-center items-center ">
-        {selectedGroup && (
-          <div className="flex flex-col box-border overflow-y-auto p-10 rounded-md w-full h-full">
-            <h1>{selectedGroup}</h1>
-            <RankingTable
-              key={rankingTableKey}
-              data={groupedData[selectedGroup]}
-            />
-          </div>
-        )}
+
+        <div className="flex w-full mt-5 justify-center items-center ">
+          {selectedGroup && (
+            <div className="flex flex-col box-border overflow-y-auto p-10 rounded-md w-full h-full">
+              <h1>{selectedGroup}</h1>
+              <RankingTable
+                key={rankingTableKey}
+                data={groupedData[selectedGroup]}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default AdminReport;
+export default AdminReportDemo;

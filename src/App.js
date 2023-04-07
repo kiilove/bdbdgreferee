@@ -12,6 +12,8 @@ import AdminLobby from "./pages/adminTools/AdminLobby";
 import AdminReport from "./pages/adminTools/AdminReport";
 import MachineCheck from "./pages/MachineCheck";
 import ScoreDemo from "./pages/adminTools/ScoreDemo";
+import AdminReportDemo from "./pages/adminTools/AdminReportDemo";
+import ScreenReport from "./pages/adminTools/ScreenReport";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -22,7 +24,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MachineCheck />} />
+        <Route path="/rankdemo" element={<MachineCheck />} />
         <Route path="/rankingdemo" element={<ScoreDemo />} />
         <Route path="/login" element={<Login />} />
 
@@ -61,7 +63,8 @@ function App() {
         />
         <Route path="/onlyadmin" element={<AdminLobby />} />
         <Route path="/adminscore" element={<AdminScore />} />
-        <Route path="/adminreport" element={<AdminReport />} />
+        <Route path="/adminreport" element={<AdminReportDemo />} />
+        <Route path="/screen" element={<ScreenReport />} />
       </Routes>
     </BrowserRouter>
   );
