@@ -1,5 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { MachineContext } from "../context/MachineContext";
 
 const MachineCheck = () => {
   const [pinMessage, setPinMessage] = useState();
@@ -22,6 +24,15 @@ const MachineCheck = () => {
       setPinMessage("PIN번호를 다시 확인하세요");
     }
   };
+
+  const { machineNumber } = useContext(MachineContext);
+  useEffect(() => {
+    console.log(machineNumber);
+    if (machineNumber === 0) {
+      navigate("/machinesetting");
+    }
+  }, [machineNumber]);
+
   return (
     <div className="w-full h-screen flex justify-center items-center flex-col gap-y-2">
       <div className="flex w-full justify-center font-extrabold ">
