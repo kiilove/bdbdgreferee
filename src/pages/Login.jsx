@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import LocalLogin from "./LocalLogin";
-import QrLogin from "./QrLogin";
 
 const Login = () => {
   const [tab, setTab] = useState("qr");
@@ -32,9 +31,7 @@ const Login = () => {
         </div>
         {/* 로그인탭시작 */}
         {tab === "qr" ? (
-          <div className="w-full h-full justify-center items-center">
-            <QrLogin />
-          </div>
+          <div className="w-full h-full justify-center items-center"></div>
         ) : (
           <div className="w-full h-full justify-center items-center">
             <LocalLogin />
