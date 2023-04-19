@@ -5,6 +5,8 @@ import ManualContestInfo from "./manualComponents/ManualContestInfo";
 import ConfirmationModal from "../modals/ConfirmationModal";
 import ManualContestOrders from "./manualComponents/ManualContestOrders";
 
+import ManualRankingBase from "./manualComponents/ManualRankingBase";
+
 const ManualRank = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -42,6 +44,7 @@ const ManualRank = () => {
           <div className="flex w-full h-full bg-green-300 justify-between items-center rounded-lg px-2">
             {selectedTab === 0 && <ManualContestInfo />}
             {selectedTab === 1 && <ManualContestOrders />}
+            {selectedTab === 2 && <ManualRankingBase />}
           </div>
         </div>
       </div>

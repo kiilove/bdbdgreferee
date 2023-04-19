@@ -8,7 +8,7 @@ const Home = () => {
       <div className="flex">
         <button
           className="bg-sky-500 w-32 h-14 rounded-lg text-white"
-          onClick={() => navigate("/manualrank")}
+          onClick={() => navigate("/manuallist")}
         >
           채점수동모드
         </button>

@@ -19,6 +19,7 @@ import MachineSetting from "./pages/adminTools/MachineSetting";
 import Home from "./pages/Home";
 import ManualRank from "./pages/ManualRank";
 import { ManualRankContextProvider } from "./context/ManualRankContext";
+import ManualList from "./pages/ManualList";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -36,6 +37,7 @@ function App() {
             <Route path="/login" element={<Login />} />
 
             <Route path="/" element={<Home />} />
+            <Route path="/manuallist" element={<ManualList />} />
             <Route path="/manualrank" element={<ManualRank />} />
             <Route path="/lobby" element={<Lobby />} />
 

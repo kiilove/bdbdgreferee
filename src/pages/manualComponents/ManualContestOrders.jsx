@@ -4,7 +4,11 @@ import { ManualRankContext } from "../../context/ManualRankContext";
 import { useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useMemo } from "react";
-import { useFirestoreAddData } from "../../customHooks/useFirestores";
+import {
+  useFirestoreAddData,
+  useFirestoreUpdateData,
+} from "../../customHooks/useFirestores";
+import { useRef } from "react";
 
 const ManualContestOrders = () => {
   const [contestCategorys, setContestCategorys] = useState([]);
@@ -18,9 +22,17 @@ const ManualContestOrders = () => {
   const [message, setMessage] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
-
+  const [isModalOpen3, setIsModalOpen3] = useState(false);
+  const [isModalOpen4, setIsModalOpen4] = useState(false);
+  const categoryTitleRef = useRef();
+  const gradeTitleRef = useRef();
+  const playerOrderNumberRef = useRef();
+  const playerNumberRef = useRef();
+  const playerNameRef = useRef();
   const { manualRank, setManualRank } = useContext(ManualRankContext);
-  const { addData: addManualRank } = useFirestoreAddData("manual_rank_base");
+
+  const { updateData: contestUpdateData } =
+    useFirestoreUpdateData("manual_rank_base");
   const handleCategoryInfo = (e) => {
     setCurrentCategoryInfo({
       ...currentCategoryInfo,
@@ -46,7 +58,8 @@ const ManualContestOrders = () => {
     const newCategoryInfo = { id: uuidv4(), ...currentCategoryInfo };
     const newContestCategorys = [...contestCategorys, newCategoryInfo];
     setContestCategorys(newContestCategorys);
-    setCurrentCategoryInfo({});
+    setCurrentCategoryInfo({ contestCategoryTitle: "", id: uuidv4() });
+    categoryTitleRef.current.focus();
   };
 
   const handleAddGradeInfo = (refId) => {
@@ -60,7 +73,7 @@ const ManualContestOrders = () => {
     };
     const newContestGrades = [...contestGrades, newGradeInfo];
     setContestGrades(newContestGrades);
-    setCurrentGradeInfo({});
+    setCurrentGradeInfo({ contestGradeTitle: "", id: uuidv4() });
   };
 
   const handleAddPlayerInfo = (refId) => {
@@ -74,9 +87,17 @@ const ManualContestOrders = () => {
       refGradeId: refId,
     };
 
+    console.log(newPlayerInfo);
+
     const newContestPlayers = [...contestPlayers, newPlayerInfo];
     setContestPlayers(newContestPlayers);
-    setCurrentPlayerInfo({});
+    setCurrentPlayerInfo({
+      contestPlayerName: "",
+      contestPlayerNumber: "",
+      id: uuidv4(),
+    });
+
+    console.log(contestPlayers);
   };
 
   const handleUpdateCategoryInfo = (refId) => {
@@ -127,6 +148,16 @@ const ManualContestOrders = () => {
     });
   };
 
+  const handleUpdateManualContest = async () => {
+    const newManualRank = {
+      ...manualRank,
+      contestOrders: contestOrders,
+    };
+    await contestUpdateData(manualRank.id, newManualRank);
+    setManualRank({ ...newManualRank });
+    setIsModalOpen4(false);
+  };
+
   const filteredGrades = useMemo(() => {
     let filtered = [];
 
@@ -156,7 +187,7 @@ const ManualContestOrders = () => {
   }, [currentGradeInfo.id]);
 
   useEffect(() => {
-    if (manualRank.contestOrders) {
+    if (manualRank.contestOrders?.contestCategorys) {
       setContestCategorys([...manualRank.contestOrders.contestCategorys]);
       setContestGrades([...manualRank.contestOrders.contestGrades]);
       setContestPlayers([...manualRank.contestOrders.contestPlayers]);
@@ -170,9 +201,9 @@ const ManualContestOrders = () => {
   // useEffect(() => {
   //   console.log(contestCategorys);
   // }, [contestCategorys]);
-  // useEffect(() => {
-  //   console.log(filteredPlayers.filtered);
-  // }, [filteredPlayers]);
+  useEffect(() => {
+    console.log(filteredPlayers.filtered);
+  }, [filteredPlayers]);
 
   return (
     <div className="flex w-full gap-x-5">
@@ -187,6 +218,7 @@ const ManualContestOrders = () => {
                 type="text"
                 name="contestCategoryTitle"
                 className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
+                ref={categoryTitleRef}
                 value={currentCategoryInfo.contestCategoryTitle}
                 onChange={(e) => handleCategoryInfo(e)}
               />
@@ -222,7 +254,7 @@ const ManualContestOrders = () => {
                       onClick={() => setCurrentCategoryInfo({ ...category })}
                     >
                       <td className="w-1/3 h-10 flex justify-start items-center ">
-                        {cIdx}
+                        {cIdx + 1}
                       </td>
                       <td className="w-2/3 h-10 flex justify-start items-center ">
                         {category.contestCategoryTitle}
@@ -245,6 +277,7 @@ const ManualContestOrders = () => {
                 type="text"
                 name="contestGradeTitle"
                 className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
+                ref={gradeTitleRef}
                 disabled={currentCategoryInfo.id ? false : true}
                 value={
                   !currentCategoryInfo.id
@@ -287,7 +320,7 @@ const ManualContestOrders = () => {
                       onClick={() => setCurrentGradeInfo(grade)}
                     >
                       <td className="w-1/3 h-10 flex justify-start items-center ">
-                        {gIdx}
+                        {gIdx + 1}
                       </td>
                       <td className="w-2/3 h-10 flex justify-start items-center ">
                         {grade.contestGradeTitle}
@@ -338,7 +371,7 @@ const ManualContestOrders = () => {
               type="number"
               name="contestOrderNumber"
               className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
-              value={filteredPlayers.count}
+              value={filteredPlayers.count + 1}
               onChange={(e) => handlePlayerInfo(e)}
             />
           </div>
@@ -395,16 +428,16 @@ const ManualContestOrders = () => {
                     선수이름
                   </td>
                 </th>
-                {contestCategorys.playerOrders?.length &&
-                  contestCategorys.playerOrders.map((player, pIdx) => (
+                {filteredPlayers.filtered?.length &&
+                  filteredPlayers.filtered.map((player, pIdx) => (
                     <tr className="text-sm font-normal w-full flex border-b border-green-400 h-10">
-                      <td className="w-1/5 h-10 flex justify-start items-center ">
-                        {player.contestPlayerOrderNumber}
+                      <td className="w-1/4 h-10 flex justify-start items-center ">
+                        {pIdx + 1}
                       </td>
-                      <td className="w-1/5 h-10 flex justify-start items-center ">
+                      <td className="w-1/4 h-10 flex justify-start items-center ">
                         {player.contestPlayerNumber}
                       </td>
-                      <td className="w-3/5 h-10 flex justify-start items-center ">
+                      <td className="w-2/4 h-10 flex justify-start items-center ">
                         {player.contestPlayerName}
                       </td>
                     </tr>
@@ -420,15 +453,13 @@ const ManualContestOrders = () => {
               handleUpdateOrders();
             }}
           >
-            임시저장
+            우선저장(1)
           </button>
           <button
             className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
-            onClick={async () => {
-              await addManualRank(manualRank);
-            }}
+            onClick={() => handleUpdateManualContest()}
           >
-            DB에저장
+            대회업데이트(2)
           </button>
         </div>
       </div>

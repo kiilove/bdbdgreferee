@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import ConfirmationModal from "../../modals/ConfirmationModal";
 import { ManualRankContext } from "../../context/ManualRankContext";
 import { useContext } from "react";
+import {
+  useFirestoreAddData,
+  useFirestoreUpdateData,
+} from "../../customHooks/useFirestores";
 
 const ManualContestInfo = () => {
   const [contestInfo, setContestInfo] = useState({});
@@ -9,7 +13,13 @@ const ManualContestInfo = () => {
   const [message, setMessage] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [isModalOpen3, setIsModalOpen3] = useState(false);
+  const [isModalOpen4, setIsModalOpen4] = useState(false);
   const [confirmedFunction, setConfirmedFunction] = useState();
+  const { data: contestAddedData, addData: contestAddData } =
+    useFirestoreAddData("manual_rank_base");
+  const { data: contestUpdatedData, updateData: contestUpdateData } =
+    useFirestoreUpdateData("manual_rank_base");
   const { manualRank, setManualRank } = useContext(ManualRankContext);
   const initContestInfo = {
     contestTitle: "",
@@ -29,6 +39,7 @@ const ManualContestInfo = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setIsModalOpen2(false);
+    setIsModalOpen3(false);
   };
 
   const handleContestInfo = (e) => {
@@ -38,6 +49,22 @@ const ManualContestInfo = () => {
   const handleUpdateManualRank = () => {
     setManualRank({ ...manualRank, contestInfo });
     setIsModalOpen2(false);
+  };
+
+  const handleAddManualContest = async () => {
+    const fetchAddedData = await contestAddData({ contestInfo: contestInfo });
+    setManualRank({ ...manualRank, contestInfo, id: fetchAddedData.id });
+    setIsModalOpen3(false);
+  };
+
+  const handleUpdateManualContest = async () => {
+    const newManualRank = {
+      ...manualRank,
+      contestInfo: contestInfo,
+    };
+    await contestUpdateData(manualRank.id, newManualRank);
+    setManualRank({ ...newManualRank });
+    setIsModalOpen4(false);
   };
 
   useEffect(() => {
@@ -58,6 +85,18 @@ const ManualContestInfo = () => {
         <ConfirmationModal
           isOpen={isModalOpen2}
           onConfirm={handleUpdateManualRank}
+          onCancel={handleModalClose}
+          message={message}
+        />
+        <ConfirmationModal
+          isOpen={isModalOpen3}
+          onConfirm={handleAddManualContest}
+          onCancel={handleModalClose}
+          message={message}
+        />
+        <ConfirmationModal
+          isOpen={isModalOpen4}
+          onConfirm={handleUpdateManualContest}
           onCancel={handleModalClose}
           message={message}
         />
@@ -133,20 +172,54 @@ const ManualContestInfo = () => {
       </div>
       <div className="flex h-12 w-full justify-end items-center rounded-lg gap-x-2">
         <button
-          className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+          className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-400 text-white"
           onClick={() => {
             setIsModalOpen2(true);
             setMessage({
               title: "저장",
-              body: "대회정보를 저장 하시겠습니까?",
+              body: "대회정보를 임시저장 하시겠습니까?",
               isButton: true,
               confirmButtonText: "확인",
               cancelButtonText: "취소",
             });
           }}
         >
-          저장
+          임시저장
         </button>
+        {manualRank?.id ? (
+          <button
+            className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+            onClick={() => {
+              setIsModalOpen4(true);
+              setMessage({
+                title: "저장",
+                body: "대회를 정보를 업데이트합니다.",
+                isButton: true,
+                confirmButtonText: "확인",
+                cancelButtonText: "취소",
+              });
+            }}
+          >
+            대회업데이트
+          </button>
+        ) : (
+          <button
+            className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+            onClick={() => {
+              setIsModalOpen3(true);
+              setMessage({
+                title: "저장",
+                body: "대회를 수동으로 개설합니다.",
+                isButton: true,
+                confirmButtonText: "확인",
+                cancelButtonText: "취소",
+              });
+            }}
+          >
+            대회개설
+          </button>
+        )}
+
         <button
           className="w-32 h-12 rounded-lg flex justify-center items-center bg-gray-300 text-gray-800"
           onClick={() => {
