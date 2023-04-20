@@ -7,8 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { RankingBoardContext } from "../../context/RankingBoardContext";
 import { db } from "../../firebase";
 import ConfirmationModal from "../../modals/ConfirmationModal";
+import { ManualRankScoreContext } from "../../context/ManualRankScoreContext";
 
-const ManualRankingHeader = ({ getInfo, selectedType }) => {
+const ManualRankingHeader = ({ getInfo, judgeIndex, selectedType }) => {
   const [scoreData, setScoreData] = useState([]);
   const [scoreBoardType, setScoreBoardType] = useState(selectedType);
   const [scoreBoardData, setScoreBoardData] = useState([]);
@@ -16,17 +17,19 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
   const [message, setMessage] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { state, dispatch } = useContext(RankingBoardContext);
+  const { manualRankScore, setManualRankScore } = useContext(
+    ManualRankScoreContext
+  );
   const navigate = useNavigate();
 
   const isReadyToSubmit = useMemo(() => {
     const isValidRankingBoard =
-      state.rankingBoard.length > 0 &&
-      state.rankingBoard.every((data) =>
+      manualRankScore?.length > 0 &&
+      manualRankScore.every((data) =>
         Object.values(data).every((val) => !!val)
       );
     return isValidRankingBoard;
-  }, [state.rankingBoard]);
+  }, [manualRankScore]);
 
   const generateDocuId = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
@@ -39,11 +42,12 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
   const addData = async (collectionName, newData, callback) => {
     try {
       const dbBatch = writeBatch(db);
-      newData.forEach((data) => {
-        const docRef = doc(collection(db, collectionName));
-        dbBatch.set(docRef, { ...data, docuId: generateDocuId() });
-      });
-      await dbBatch.commit();
+      console.log(newData);
+      // newData.forEach((data) => {
+      //   const docRef = doc(collection(db, collectionName));
+      //   dbBatch.set(docRef, { ...data, docuId: generateDocuId() });
+      // });
+      // await dbBatch.commit();
       callback && callback();
     } catch (error) {
       setError(error);
@@ -65,7 +69,7 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
       cancelButtonText: "",
     });
     setIsModalOpen(true);
-    addData("rankingboard", state.rankingBoard, () => {
+    addData("manual_rankingboard", manualRankScore, () => {
       setMessage({
         title: "데이터완료",
         body: "제출이 완료되었습니다.",
@@ -77,7 +81,6 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
   };
 
   const handleSavedConfirm = async () => {
-    dispatch({ type: "COMPELETE" });
     setIsModalOpen(false);
     //navigate("/lobby", { replace: true });
   };
@@ -98,17 +101,17 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
         <div className="flex w-2/5 flex-col gap-y-2 p-1">
           <div className="flex w-full bg-slate-800 px-3 rounded-lg h-9 justify-start items-center">
             <p className="text-white text-sm">
-              대회명 : <span>{getInfo.cupData.cupInfo.cupName}</span>
+              대회명 : <span>{getInfo.contestTitle}</span>
             </p>
           </div>
           <div className="flex w-full bg-slate-800 px-3 rounded-lg h-9 justify-start items-center">
             <p className="text-white text-sm">
-              장소 : <span>{getInfo.cupData.cupInfo.cupLocation}</span>
+              장소 : <span>{getInfo.contestLocation}</span>
             </p>
           </div>
           <div className="flex w-full bg-slate-800 px-3 rounded-lg h-9 justify-start items-center">
             <p className="text-white text-sm">
-              심판 : <span>{getInfo.referee.refName}</span>
+              심판 : <span>{judgeIndex}</span>
             </p>
           </div>
         </div>
@@ -117,7 +120,7 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
             <p className="text-white text-sm">
               심사종목 :{" "}
               <span>
-                {getInfo.gameData.gameTitle} / {getInfo.gameData.classTitle}
+                {getInfo.categoryTitle} / {getInfo.gradeTitle}
               </span>
             </p>
           </div>
@@ -125,24 +128,17 @@ const ManualRankingHeader = ({ getInfo, selectedType }) => {
           <div className="flex w-full bg-slate-800 px-3 rounded-lg h-9 justify-start items-center">
             <p className="text-white text-sm">
               일자 :{" "}
-              <span>
-                {dayjs(getInfo.cupData.cupInfo.cupDate.startDate).format(
-                  "YYYY-MM-DD"
-                )}
-              </span>
+              <span>{dayjs(getInfo.contestDate).format("YYYY-MM-DD")}</span>
             </p>
           </div>
           <div className="flex w-full bg-slate-800 px-3 rounded-lg h-9 justify-start items-center">
             <p className="text-white text-sm">
-              좌석번호 : <span>{getInfo.seatIndex}</span>
+              좌석번호 : <span>{judgeIndex}</span>
             </p>
           </div>
         </div>
         <div className="flex w-1/5 flex-col p-1 gap-y-2">
           <div className="flex w-full h-full bg-slate-800 p-2 rounded-lg justify-start items-center flex-col gap-y-1">
-            <div className="flex bg-slate-400 w-full h-full rounded-lg justify-center items-center">
-              <span className=" text-2xl font-bold">서명</span>
-            </div>
             <button
               className={`${
                 !isReadyToSubmit ? "bg-yellow-500 " : "bg-red-500 "

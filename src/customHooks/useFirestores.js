@@ -42,20 +42,15 @@ export function useFirestoreQuery() {
 
     try {
       setLoading(true);
+      console.log(q);
       const querySnapshot = await getDocs(q);
-
-      // 데이터가 없는 경우 처리
-      if (querySnapshot.docs.length === 0) {
-        setData([]);
-        setLoading(false);
-        return [];
-      }
 
       const documents = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
+      // 데이터가 없는 경우에도 state를 초기화함
       setData(documents);
       setLoading(false);
       return documents;

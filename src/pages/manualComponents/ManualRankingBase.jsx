@@ -3,17 +3,27 @@ import { ManualRankContext } from "../../context/ManualRankContext";
 import { useContext } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import ManualRankingBoard from "./ManualRankingBoard";
+import { useFirestoreQuery } from "../../customHooks/useFirestores";
+import { where } from "firebase/firestore";
 
 const ManualRankingBase = () => {
+  const [currentGrade, setCurrentGrade] = useState({});
+  const [currentJudgeIndex, setCurrentJudgeIndex] = useState(1);
   const { manualRank, setManualRank } = useContext(ManualRankContext);
   const [groupedGradeId, setGroupedGradeId] = useState([]);
+  const getScoreCard = useFirestoreQuery();
 
   const renderButtons = () => {
     return Array.from({ length: 9 }, (_, i) => i + 1).map((number) => (
       <button
         key={number}
-        onClick={() => console.log(`Button ${number} clicked`)}
-        className="w-8 h-8 flex bg-green-100 justify-center items-center rounded-md"
+        onClick={() => setCurrentJudgeIndex(number)}
+        className={`${
+          currentJudgeIndex === number
+            ? "bg-green-600 text-white w-12 h-12 flex  justify-center items-center rounded-md"
+            : "bg-green-100 text-gray-500 w-10 h-10 flex  justify-center items-center rounded-md"
+        } `}
       >
         {number}
       </button>
@@ -39,8 +49,15 @@ const ManualRankingBase = () => {
         groupData = {
           refGradeId: player.refGradeId,
           players: [],
+          gradeId: grade.id,
           gradeTitle: grade.contestGradeTitle,
+          categoryId: category.id,
           categoryTitle: category.contestCategoryTitle,
+          contestTitle: manualRank.contestInfo.contestTitle,
+          contestLocation: manualRank.contestInfo.contestLocation,
+          contestDate: manualRank.contestInfo.contestDate,
+          contestId: manualRank.id,
+          judgeIndex: 1,
         };
 
         grouped.push(groupData);
@@ -52,6 +69,21 @@ const ManualRankingBase = () => {
     return grouped;
   };
 
+  const fetchedScoreCard = async () => {
+    const coditions = [
+      where("refCupId", "==", manualRank.id),
+      where("refGameId", "==", currentGrade.categoryId),
+      where("refClassTitle", "==", currentGrade.gradeTitle),
+      where("judgeUid", "==", currentJudgeIndex),
+    ];
+    const result = await getScoreCard.getDocuments(
+      "manual_rankingboard",
+      coditions
+    );
+
+    console.log(result);
+  };
+
   useEffect(() => {
     if (manualRank.contestOrders?.contestPlayers.length) {
       const getPlayers = [...manualRank.contestOrders.contestPlayers];
@@ -60,6 +92,12 @@ const ManualRankingBase = () => {
       console.log(groupByGradeId(getPlayers, getGrades, getCategorys));
     }
   }, [manualRank]);
+
+  useEffect(() => {
+    if (currentGrade.refGradeId) {
+      fetchedScoreCard();
+    }
+  }, [currentJudgeIndex]);
 
   return (
     <div className="flex w-full gap-x-5">
@@ -72,10 +110,13 @@ const ManualRankingBase = () => {
         <div className="flex w-full h-full justify-start items-center flex-col gap-y-2">
           {groupedGradeId?.length &&
             groupedGradeId.map((grouped, gIdx) => (
-              <div className="flex w-full bg-green-500 px-3 h-10 justify-start items-center rounded-lg">
+              <button
+                className="flex w-full bg-green-500 px-3 h-10 justify-start items-center rounded-lg"
+                onClick={() => setCurrentGrade({ ...grouped })}
+              >
                 {grouped.categoryTitle} / {grouped.gradeTitle}(
                 {grouped.players?.length})
-              </div>
+              </button>
             ))}
         </div>
       </div>
@@ -85,10 +126,16 @@ const ManualRankingBase = () => {
             <span>심판/채점표 자리번호</span>
           </div>
         </div>
-        <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg flex-col">
+        <div className="flex h-16 w-full justify-start items-center bg-green-400 p-3 rounded-lg flex-col">
           <div className="flex justify-between items-center w-full px-3 h-full">
             {renderButtons()}
           </div>
+        </div>
+        <div className="flex">
+          <ManualRankingBoard
+            getInfo={currentGrade}
+            judgeIndex={currentJudgeIndex}
+          />
         </div>
       </div>
     </div>

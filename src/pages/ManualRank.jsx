@@ -6,6 +6,7 @@ import ConfirmationModal from "../modals/ConfirmationModal";
 import ManualContestOrders from "./manualComponents/ManualContestOrders";
 
 import ManualRankingBase from "./manualComponents/ManualRankingBase";
+import ManualRankingReport from "./manualComponents/ManualRankingReport";
 
 const ManualRank = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -45,6 +46,7 @@ const ManualRank = () => {
             {selectedTab === 0 && <ManualContestInfo />}
             {selectedTab === 1 && <ManualContestOrders />}
             {selectedTab === 2 && <ManualRankingBase />}
+            {selectedTab === 3 && <ManualRankingReport />}
           </div>
         </div>
       </div>

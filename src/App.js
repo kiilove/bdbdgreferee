@@ -20,6 +20,7 @@ import Home from "./pages/Home";
 import ManualRank from "./pages/ManualRank";
 import { ManualRankContextProvider } from "./context/ManualRankContext";
 import ManualList from "./pages/ManualList";
+import { ManualRankScoreContextProvider } from "./context/ManualRankScoreContext";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -30,27 +31,29 @@ function App() {
   return (
     <MachineContextProvider>
       <ManualRankContextProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/rankdemo" element={<MachineCheck />} />
-            <Route path="/rankingdemo" element={<ScoreDemo />} />
-            <Route path="/login" element={<Login />} />
+        <ManualRankScoreContextProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/rankdemo" element={<MachineCheck />} />
+              <Route path="/rankingdemo" element={<ScoreDemo />} />
+              <Route path="/login" element={<Login />} />
 
-            <Route path="/" element={<Home />} />
-            <Route path="/manuallist" element={<ManualList />} />
-            <Route path="/manualrank" element={<ManualRank />} />
-            <Route path="/lobby" element={<Lobby />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/manuallist" element={<ManualList />} />
+              <Route path="/manualrank" element={<ManualRank />} />
+              <Route path="/lobby" element={<Lobby />} />
 
-            <Route path="/scoring" element={<Scoring />} />
-            <Route path="/scorevertical" element={<ScoreVertical />} />
-            <Route path="/scorevertical2" element={<VerticalRank />} />
-            <Route path="/onlyadmin" element={<AdminLobby />} />
-            <Route path="/adminscore" element={<AdminScore />} />
-            <Route path="/adminreport" element={<AdminReportDemo />} />
-            <Route path="/screen" element={<ScreenReport />} />
-            <Route path="/machinesetting" element={<MachineSetting />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="/scoring" element={<Scoring />} />
+              <Route path="/scorevertical" element={<ScoreVertical />} />
+              <Route path="/scorevertical2" element={<VerticalRank />} />
+              <Route path="/onlyadmin" element={<AdminLobby />} />
+              <Route path="/adminscore" element={<AdminScore />} />
+              <Route path="/adminreport" element={<AdminReportDemo />} />
+              <Route path="/screen" element={<ScreenReport />} />
+              <Route path="/machinesetting" element={<MachineSetting />} />
+            </Routes>
+          </BrowserRouter>
+        </ManualRankScoreContextProvider>
       </ManualRankContextProvider>
     </MachineContextProvider>
   );
