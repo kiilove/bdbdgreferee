@@ -6,8 +6,11 @@ import { useMemo } from "react";
 import { useContext } from "react";
 
 import { ManualRankScoreContext } from "../../context/ManualRankScoreContext";
-import { useFirestoreAddData } from "../../customHooks/useFirestores";
-import { collection, doc, writeBatch } from "firebase/firestore";
+import {
+  useFirestoreAddData,
+  useFirestoreQuery,
+} from "../../customHooks/useFirestores";
+import { collection, doc, where, writeBatch } from "firebase/firestore";
 import { db } from "../../firebase";
 
 const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
@@ -17,6 +20,8 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   const [scoreEndPlayers, setScoreEndPlayers] = useState([]);
   const [scoreOwners, setScoreOwners] = useState([]);
   const [error, setError] = useState("");
+  const [currentScoreCard, setCurrentScoreCard] = useState([]);
+  const getScoreCard = useFirestoreQuery();
 
   const { manualRankScore, setManualRankScore } = useContext(
     ManualRankScoreContext
@@ -51,6 +56,22 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     window.addEventListener("scroll", updateScroll);
   }, []);
 
+  const fetchedScoreCard = async () => {
+    const conditions = [
+      where("refCupId", "==", getInfo.contestId),
+      where("refGameId", "==", getInfo.categoryId),
+      where("refClassTitle", "==", getInfo.gradeTitle),
+      where("judgeUid", "==", judgeIndex),
+    ];
+
+    const result = await getScoreCard.getDocuments(
+      "manual_rankingboard",
+      conditions
+    );
+    setCurrentScoreCard([...result]);
+    console.log(result);
+  };
+
   const initRankBoard = () => {
     let dummy = [];
     let dummySelected = [];
@@ -58,15 +79,23 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     setScoreCards([]);
     setScoreEndPlayers([]);
     setScoreOwners([]);
-    console.log(getInfo);
+    fetchedScoreCard();
+    console.log(currentScoreCard);
+    console.log(judgeIndex);
 
     getInfo.players?.length &&
       getInfo.players.map((item, idx) => {
+        const prevRank = currentScoreCard.filter(
+          (score) => score.playerUid === item.id
+        );
+
+        console.log(prevRank[0]?.playerRank);
+
         const player = {
           playerUid: item.id,
           playerName: item.contestPlayerName,
           playerNumber: item.contestPlayerNumber,
-          playerRank: 0,
+          playerRank: prevRank[0]?.playerRank || 0,
           judgeUid: judgeIndex,
           refCupId: getInfo.contestId,
           refGameId: getInfo.categoryId,
@@ -112,10 +141,6 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
 
     newScoreCards.splice(indexPlayerFromScoreCards, 1, newScoreCard);
     setScoreCards([...newScoreCards]);
-
-    console.log(newScoreCards);
-    console.log(indexPlayerFromScoreCards);
-    console.log(scoreCards);
   };
 
   const handleManualRankScore = () => {
@@ -130,6 +155,7 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
 
   useEffect(() => {
     initRankBoard();
+    console.log(scoreCards);
   }, [judgeIndex]);
 
   return (
@@ -222,12 +248,21 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
               ))}
           </div>
           <div className="flex h-full rounded-md w-full bg-green-200 py-2 justify-end items-center ">
-            <button
-              className="w-24 h-12 bg-green-500 rounded-lg mr-2"
-              onClick={() => addData("manual_rankingboard", scoreCards)}
-            >
-              저장
-            </button>
+            {currentScoreCard?.length ? (
+              <button
+                className="w-24 h-12 bg-green-500 rounded-lg mr-2"
+                onClick={() => addData("manual_rankingboard", scoreCards)}
+              >
+                수정
+              </button>
+            ) : (
+              <button
+                className="w-24 h-12 bg-green-500 rounded-lg mr-2"
+                onClick={() => addData("manual_rankingboard", scoreCards)}
+              >
+                저장
+              </button>
+            )}
           </div>
         </div>
       </div>

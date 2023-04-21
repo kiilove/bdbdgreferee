@@ -10,6 +10,7 @@ import { where } from "firebase/firestore";
 const ManualRankingBase = () => {
   const [currentGrade, setCurrentGrade] = useState({});
   const [currentJudgeIndex, setCurrentJudgeIndex] = useState(1);
+  const [currentScoreCard, setCurrentScoreCard] = useState([]);
   const { manualRank, setManualRank } = useContext(ManualRankContext);
   const [groupedGradeId, setGroupedGradeId] = useState([]);
   const getScoreCard = useFirestoreQuery();
@@ -18,7 +19,10 @@ const ManualRankingBase = () => {
     return Array.from({ length: 9 }, (_, i) => i + 1).map((number) => (
       <button
         key={number}
-        onClick={() => setCurrentJudgeIndex(number)}
+        onClick={() => {
+          console.log(number);
+          setCurrentJudgeIndex(number);
+        }}
         className={`${
           currentJudgeIndex === number
             ? "bg-green-600 text-white w-12 h-12 flex  justify-center items-center rounded-md"
@@ -76,11 +80,12 @@ const ManualRankingBase = () => {
       where("refClassTitle", "==", currentGrade.gradeTitle),
       where("judgeUid", "==", currentJudgeIndex),
     ];
+    console.log(coditions);
     const result = await getScoreCard.getDocuments(
       "manual_rankingboard",
       coditions
     );
-
+    setCurrentScoreCard([...result]);
     console.log(result);
   };
 
@@ -93,11 +98,11 @@ const ManualRankingBase = () => {
     }
   }, [manualRank]);
 
-  useEffect(() => {
-    if (currentGrade.refGradeId) {
-      fetchedScoreCard();
-    }
-  }, [currentJudgeIndex]);
+  // useEffect(() => {
+  //   if (currentGrade.refGradeId) {
+  //     fetchedScoreCard();
+  //   }
+  // }, [currentJudgeIndex]);
 
   return (
     <div className="flex w-full gap-x-5">

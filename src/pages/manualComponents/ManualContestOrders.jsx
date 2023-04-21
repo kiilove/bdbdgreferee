@@ -168,7 +168,7 @@ const ManualContestOrders = () => {
         );
       }
     }
-    console.log(filtered);
+
     return filtered;
   }, [contestGrades, currentCategoryInfo.id]);
 
@@ -193,17 +193,6 @@ const ManualContestOrders = () => {
       setContestPlayers([...manualRank.contestOrders.contestPlayers]);
     }
   }, [manualRank]);
-
-  // useEffect(() => {
-  //   console.log(currentCategoryInfo);
-  // }, [currentCategoryInfo]);
-
-  // useEffect(() => {
-  //   console.log(contestCategorys);
-  // }, [contestCategorys]);
-  useEffect(() => {
-    console.log(filteredPlayers.filtered);
-  }, [filteredPlayers]);
 
   return (
     <div className="flex w-full gap-x-5">
