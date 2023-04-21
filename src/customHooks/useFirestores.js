@@ -42,7 +42,7 @@ export function useFirestoreQuery() {
 
     try {
       setLoading(true);
-      console.log(q);
+
       const querySnapshot = await getDocs(q);
 
       const documents = querySnapshot.docs.map((doc) => ({

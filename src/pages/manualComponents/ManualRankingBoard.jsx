@@ -10,7 +10,15 @@ import {
   useFirestoreAddData,
   useFirestoreQuery,
 } from "../../customHooks/useFirestores";
-import { collection, doc, where, writeBatch } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 
 const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
@@ -26,12 +34,50 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   const { manualRankScore, setManualRankScore } = useContext(
     ManualRankScoreContext
   );
+
   const generateDocuId = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
     const timestamp = Date.now().toString().substr(-4);
     const extraString = Math.random().toString(36).substring(2, 8);
     const id = `${randomString}-${timestamp}-${extraString}`.toUpperCase();
     return id;
+  };
+
+  const handleRankingBoardUpdate = async (
+    judgeId,
+    refCupId,
+    refGameId,
+    refClassTitle
+  ) => {
+    console.log(judgeId);
+    await deleteMatchingDocuments(judgeId, refCupId, refGameId, refClassTitle);
+    await addData("manual_rankingboard", scoreCards);
+  };
+
+  const deleteMatchingDocuments = async (
+    judgeId,
+    refCupId,
+    refGameId,
+    refClassTitle
+  ) => {
+    console.log(judgeId);
+    const manualRankingBoardRef = collection(db, "manual_rankingboard");
+    const q = query(
+      manualRankingBoardRef,
+      where("judgeUid", "==", judgeId),
+
+      where("refCupId", "==", refCupId),
+      where("refGameId", "==", refGameId),
+      where("refClassTitle", "==", refClassTitle)
+    );
+
+    const querySnapshot = await getDocs(q);
+    console.log(querySnapshot);
+
+    querySnapshot.forEach(async (docSnapshot) => {
+      console.log(docSnapshot.id);
+      await deleteDoc(doc(db, "manual_rankingboard", docSnapshot.id));
+    });
   };
 
   const addData = async (collectionName, newData, callback) => {
@@ -68,28 +114,25 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
       "manual_rankingboard",
       conditions
     );
-    setCurrentScoreCard([...result]);
-    console.log(result);
+    return result;
   };
 
-  const initRankBoard = () => {
+  const initRankBoard = async () => {
     let dummy = [];
     let dummySelected = [];
 
     setScoreCards([]);
     setScoreEndPlayers([]);
     setScoreOwners([]);
-    fetchedScoreCard();
-    console.log(currentScoreCard);
+    const fetchedResult = await fetchedScoreCard();
+    console.log(fetchedResult);
     console.log(judgeIndex);
 
     getInfo.players?.length &&
       getInfo.players.map((item, idx) => {
-        const prevRank = currentScoreCard.filter(
+        const prevRank = fetchedResult.filter(
           (score) => score.playerUid === item.id
         );
-
-        console.log(prevRank[0]?.playerRank);
 
         const player = {
           playerUid: item.id,
@@ -124,7 +167,7 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     if (getInfo.players?.length) {
       initRankBoard();
     }
-  }, [getInfo]);
+  }, [getInfo, judgeIndex]);
 
   const handleScoreCard = (oIdx, value, playerUid, judgeIndex) => {
     console.log({ oIdx, value, playerUid, judgeIndex });
@@ -152,11 +195,6 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   useMemo(() => {
     handleManualRankScore();
   }, [scoreCards]);
-
-  useEffect(() => {
-    initRankBoard();
-    console.log(scoreCards);
-  }, [judgeIndex]);
 
   return (
     <div className="flex w-full justify-start items-start mb-44 flex-col">
@@ -219,7 +257,11 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
                       {scoreOwners.length &&
                         scoreOwners.map((owner, oIdx) => (
                           <button
-                            className="flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center text-black bg-yellow-300 text-2xl"
+                            className={
+                              rank.playerRank === owner.value
+                                ? "flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center  bg-green-600 text-2xl text-gray-200"
+                                : "flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center text-black bg-yellow-300 text-2xl"
+                            }
                             value={parseInt(owner.value)}
                             onClick={() =>
                               handleScoreCard(
@@ -234,7 +276,11 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
                           </button>
                         ))}
                       <button
-                        className="flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center text-black bg-yellow-300 text-2xl"
+                        className={
+                          rank.playerRank === 100
+                            ? "flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center  bg-green-600 text-2xl text-gray-200"
+                            : "flex w-14 h-14 p-2 rounded-md border border-green-300 justify-center items-center text-black bg-yellow-300 text-2xl"
+                        }
                         value={parseInt(100)}
                         onClick={() =>
                           handleScoreCard(100, 100, rank.playerUid, judgeIndex)
@@ -251,14 +297,29 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
             {currentScoreCard?.length ? (
               <button
                 className="w-24 h-12 bg-green-500 rounded-lg mr-2"
-                onClick={() => addData("manual_rankingboard", scoreCards)}
+                onClick={() =>
+                  handleRankingBoardUpdate(
+                    scoreCards[0].refSeatIndex,
+                    scoreCards[0].refCupId,
+                    scoreCards[0].refGameId,
+                    scoreCards[0].refClassTitle
+                  )
+                }
               >
                 수정
               </button>
             ) : (
               <button
                 className="w-24 h-12 bg-green-500 rounded-lg mr-2"
-                onClick={() => addData("manual_rankingboard", scoreCards)}
+                onClick={() => {
+                  console.log(scoreCards);
+                  handleRankingBoardUpdate(
+                    scoreCards[0].refSeatIndex,
+                    scoreCards[0].refCupId,
+                    scoreCards[0].refGameId,
+                    scoreCards[0].refClassTitle
+                  );
+                }}
               >
                 저장
               </button>

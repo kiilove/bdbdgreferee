@@ -189,8 +189,10 @@ const ManualContestOrders = () => {
   useEffect(() => {
     if (manualRank.contestOrders?.contestCategorys) {
       setContestCategorys([...manualRank.contestOrders.contestCategorys]);
-      setContestGrades([...manualRank.contestOrders.contestGrades]);
-      setContestPlayers([...manualRank.contestOrders.contestPlayers]);
+      manualRank.contestOrders?.contestGrades &&
+        setContestGrades([...manualRank.contestOrders.contestGrades]);
+      manualRank.contestOrders?.contestPlayers &&
+        setContestPlayers([...manualRank.contestOrders.contestPlayers]);
     }
   }, [manualRank]);
 

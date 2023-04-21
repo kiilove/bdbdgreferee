@@ -73,36 +73,30 @@ const ManualRankingBase = () => {
     return grouped;
   };
 
-  const fetchedScoreCard = async () => {
-    const coditions = [
-      where("refCupId", "==", manualRank.id),
-      where("refGameId", "==", currentGrade.categoryId),
-      where("refClassTitle", "==", currentGrade.gradeTitle),
-      where("judgeUid", "==", currentJudgeIndex),
-    ];
-    console.log(coditions);
-    const result = await getScoreCard.getDocuments(
-      "manual_rankingboard",
-      coditions
-    );
-    setCurrentScoreCard([...result]);
-    console.log(result);
-  };
+  // const fetchedScoreCard = async () => {
+  //   const coditions = [
+  //     where("refCupId", "==", manualRank.id),
+  //     where("refGameId", "==", currentGrade.categoryId),
+  //     where("refClassTitle", "==", currentGrade.gradeTitle),
+  //     where("judgeUid", "==", currentJudgeIndex),
+  //   ];
+  //   console.log(coditions);
+  //   const result = await getScoreCard.getDocuments(
+  //     "manual_rankingboard",
+  //     coditions
+  //   );
+  //   setCurrentScoreCard([...result]);
+  //   console.log(result);
+  // };
 
   useEffect(() => {
-    if (manualRank.contestOrders?.contestPlayers.length) {
+    if (manualRank.contestOrders.contestPlayers?.length) {
       const getPlayers = [...manualRank.contestOrders.contestPlayers];
       const getGrades = [...manualRank.contestOrders.contestGrades];
       const getCategorys = [...manualRank.contestOrders.contestCategorys];
-      console.log(groupByGradeId(getPlayers, getGrades, getCategorys));
+      groupByGradeId(getPlayers, getGrades, getCategorys);
     }
   }, [manualRank]);
-
-  // useEffect(() => {
-  //   if (currentGrade.refGradeId) {
-  //     fetchedScoreCard();
-  //   }
-  // }, [currentJudgeIndex]);
 
   return (
     <div className="flex w-full gap-x-5">
@@ -116,8 +110,15 @@ const ManualRankingBase = () => {
           {groupedGradeId?.length &&
             groupedGradeId.map((grouped, gIdx) => (
               <button
-                className="flex w-full bg-green-500 px-3 h-10 justify-start items-center rounded-lg"
-                onClick={() => setCurrentGrade({ ...grouped })}
+                className={
+                  grouped.refGradeId === currentGrade.refGradeId
+                    ? "flex w-full bg-green-600 px-3 h-10 justify-start items-center rounded-lg text-white"
+                    : "flex w-full bg-green-500 px-3 h-10 justify-start items-center rounded-lg"
+                }
+                onClick={() => {
+                  setCurrentJudgeIndex(1);
+                  setCurrentGrade({ ...grouped });
+                }}
               >
                 {grouped.categoryTitle} / {grouped.gradeTitle}(
                 {grouped.players?.length})
