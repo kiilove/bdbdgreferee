@@ -7,6 +7,7 @@ import ManualContestOrders from "./manualComponents/ManualContestOrders";
 
 import ManualRankingBase from "./manualComponents/ManualRankingBase";
 import ManualRankingReport from "./manualComponents/ManualRankingReport";
+import ManualRankingReportType2 from "./manualComponents/ManualRankingReportType2";
 
 const ManualRank = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -16,6 +17,7 @@ const ManualRank = () => {
     { idx: 1, title: "출전선수명단" },
     { idx: 2, title: "심사표입력" },
     { idx: 3, title: "집계표출력" },
+    { idx: 4, title: "순위표출력" },
   ];
 
   return (
@@ -47,6 +49,7 @@ const ManualRank = () => {
             {selectedTab === 1 && <ManualContestOrders />}
             {selectedTab === 2 && <ManualRankingBase />}
             {selectedTab === 3 && <ManualRankingReport />}
+            {selectedTab === 4 && <ManualRankingReportType2 />}
           </div>
         </div>
       </div>

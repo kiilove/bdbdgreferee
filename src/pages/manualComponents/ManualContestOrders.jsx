@@ -153,6 +153,8 @@ const ManualContestOrders = () => {
       ...manualRank,
       contestOrders: contestOrders,
     };
+
+    console.log(newManualRank);
     await contestUpdateData(manualRank.id, newManualRank);
     setManualRank({ ...newManualRank });
     setIsModalOpen4(false);

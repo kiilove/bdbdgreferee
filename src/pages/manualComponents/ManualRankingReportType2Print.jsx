@@ -6,7 +6,7 @@ import { useContext } from "react";
 import { ManualRankContext } from "../../context/ManualRankContext";
 import { useFirestoreQuery } from "../../customHooks/useFirestores";
 
-const ManualRankingReportPrint = ({ key, data, handleCancelClick }) => {
+const ManualRankingReportType2Print = ({ key, data, handleCancelClick }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupedData, setGroupedData] = useState(null);
@@ -296,4 +296,4 @@ const ManualRankingReportPrint = ({ key, data, handleCancelClick }) => {
   );
 };
 
-export default ManualRankingReportPrint;
+export default ManualRankingReportType2Print;

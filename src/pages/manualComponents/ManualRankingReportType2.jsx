@@ -7,8 +7,9 @@ import { ManualRankContext } from "../../context/ManualRankContext";
 import { useFirestoreQuery } from "../../customHooks/useFirestores";
 import { Modal } from "@mui/material";
 import ManualRankingReportPrint from "./ManualRankingReportPrint";
+import ManualRankingReportType2Print from "./ManualRankingReportType2Print";
 
-const ManualRankingReport = () => {
+const ManualRankingReportType2 = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -67,6 +68,7 @@ const ManualRankingReport = () => {
 
   const RankingTable = React.forwardRef(({ data }, ref) => {
     const playerNumbers = [...new Set(data.map((item) => item.playerNumber))];
+    const playerNames = [...new Set(data.map((item) => item.playerName))];
     const refSeatIndexes = [
       ...new Set(data.map((item) => item.refSeatIndex)),
     ].sort();
@@ -146,13 +148,9 @@ const ManualRankingReport = () => {
         <table>
           <thead>
             <tr className="border-b">
-              <th className="w-20 text-base ">선수번호</th>
+              <th className="w-20 text-base ">선수번호(이름)</th>
               <th className="w-20 h-10 text-base font-bold">순위</th>
-              {refSeatIndexes.map((refSeatIndex) => (
-                <th className="w-20" key={refSeatIndex}>
-                  {refSeatIndex}
-                </th>
-              ))}
+
               <th className="text-sm">기표합산</th>
             </tr>
           </thead>
@@ -160,26 +158,12 @@ const ManualRankingReport = () => {
             {sortedRankIndex.map((rowIndex, rank, index) => (
               <tr key={rowIndex} className="table-row-wrapper">
                 <td className="w-20 h-10 text-center font-semibold">
-                  {playerNumbers[rowIndex]}
+                  {playerNumbers[rowIndex]}({playerNames[rowIndex]})
                 </td>
                 <td className="w-20 h-10 text-center text-lg font-semibold">
                   {rank + 1}
                 </td>
-                {refSeatIndexes.map((refSeatIndex, j) => {
-                  const index = data.findIndex(
-                    (item) =>
-                      item.playerNumber === playerNumbers[rowIndex] &&
-                      item.refSeatIndex === refSeatIndex
-                  );
-                  return (
-                    <td
-                      key={`${rowIndex}-${j}`}
-                      className={`${rowBgColors[rowIndex][j]} w-20 h-10 text-center`}
-                    >
-                      {index >= 0 ? data[index].playerRank : ""}
-                    </td>
-                  );
-                })}
+
                 <td className="w-20 h-10 text-center">{totals[rowIndex]}</td>
               </tr>
             ))}
@@ -194,7 +178,7 @@ const ManualRankingReport = () => {
       <div className="flex w-full gap-x-5 flex-col">
         {!isLoading && (
           <Modal open={isOpen} onClose={handleCancelClick}>
-            <ManualRankingReportPrint
+            <ManualRankingReportType2Print
               key={selectedGroup || ""}
               data={groupedData[selectedGroup] || []}
               handleCancelClick={handleCancelClick}
@@ -202,7 +186,7 @@ const ManualRankingReport = () => {
           </Modal>
         )}
 
-        <div className="flex gap-x-5 flex-wrap w-full box-border h-full">
+        <div className="flex gap-x-5 flex-wrap w-full">
           {!isLoading && (
             <div className="flex justify-center items-center gap-2 mb-5 flex-wrap">
               {Object.keys(groupedData || {}).map((key) => (
@@ -230,15 +214,15 @@ const ManualRankingReport = () => {
           )}
         </div>
         <div className="flex">
-          <button
-            className="w-40 h-14 bg-green-500 rounded-lg mb-5"
-            onClick={() => {
-              console.log(selectedGroup);
-              setIsOpen(true);
-            }}
-          >
-            집계표출력 미리보기
-          </button>
+          <ReactToPrint
+            trigger={() => (
+              <button className="w-40 h-10 bg-green-300 rounded-lg mb-5">
+                순위표출력
+              </button>
+            )}
+            content={() => printRef.current}
+            pageStyle="@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
+          />
         </div>
         <div
           className="flex w-full justify-center items-center bg-white p-5"
@@ -253,7 +237,7 @@ const ManualRankingReport = () => {
                       className="flex justify-center items-center h-14 text-3xl font-extrabold font-sans"
                       style={{ letterSpacing: "20px" }}
                     >
-                      집계표
+                      순위표
                     </h1>
                   </div>
                 </div>
@@ -291,4 +275,4 @@ const ManualRankingReport = () => {
   );
 };
 
-export default ManualRankingReport;
+export default ManualRankingReportType2;
