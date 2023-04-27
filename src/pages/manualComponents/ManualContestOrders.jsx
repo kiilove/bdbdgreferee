@@ -76,7 +76,8 @@ const ManualContestOrders = () => {
     setCurrentGradeInfo({ contestGradeTitle: "", id: uuidv4() });
   };
 
-  const handleAddPlayerInfo = (refId) => {
+  const handleAddPlayerInfo = (refId, playerIndex) => {
+    console.log(playerIndex);
     if (!refId) {
       return;
     }
@@ -85,6 +86,7 @@ const ManualContestOrders = () => {
       id: uuidv4(),
       ...currentPlayerInfo,
       refGradeId: refId,
+      contestPlayerIndex: playerIndex,
     };
 
     console.log(newPlayerInfo);
@@ -94,7 +96,10 @@ const ManualContestOrders = () => {
     setCurrentPlayerInfo({
       contestPlayerName: "",
       contestPlayerNumber: "",
+      contestPlayerGym: "",
+      contestPlayerPhoneNumber: "",
       id: uuidv4(),
+      contestPlayerIndex: playerIndex,
     });
 
     console.log(contestPlayers);
@@ -186,7 +191,7 @@ const ManualContestOrders = () => {
     }
 
     return { filtered, count };
-  }, [currentGradeInfo.id]);
+  }, [currentGradeInfo.id, currentPlayerInfo]);
 
   useEffect(() => {
     if (manualRank.contestOrders?.contestCategorys) {
@@ -200,7 +205,7 @@ const ManualContestOrders = () => {
 
   return (
     <div className="flex w-full gap-x-5">
-      <div className="w-full h-full flex flex-col gap-y-2 py-2">
+      <div className="w-1/4 h-full flex flex-col gap-y-2 py-2">
         <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
           <div className="flex w-1/4 h-full justify-start items-center ml-5">
             <span>종목명</span>
@@ -259,7 +264,7 @@ const ManualContestOrders = () => {
           </div>
         </div>
       </div>
-      <div className="w-full h-full flex flex-col gap-y-2 py-2">
+      <div className="w-1/4 h-full flex flex-col gap-y-2 py-2">
         <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
           <div className="flex w-1/4 h-full justify-start items-center ml-5">
             <span>체급</span>
@@ -325,7 +330,7 @@ const ManualContestOrders = () => {
           </div>
         </div>
       </div>
-      <div className="w-full h-full flex flex-col gap-y-2 py-2">
+      <div className="w-1/2 h-full flex flex-col gap-y-2 py-2">
         <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
           <div className="flex w-1/4 h-full justify-start items-center ml-5">
             <span>종목명</span>
@@ -396,15 +401,53 @@ const ManualContestOrders = () => {
                 value={currentPlayerInfo.contestPlayerName}
                 onChange={(e) => handlePlayerInfo(e)}
               />
-
-              <button
-                className="w-24 h-10 rounded-lg flex justify-center items-center bg-blue-500 text-white"
-                onClick={() => handleAddPlayerInfo(currentGradeInfo.id)}
-              >
-                선수추가
-              </button>
             </div>
           </div>
+        </div>
+        <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
+          <div className="flex w-1/4 h-full justify-start items-center ml-5">
+            <span>소속</span>
+          </div>
+          <div className="flex w-3/4 h-full justify-start items-center ">
+            <div className="flex w-full gap-x-2 ">
+              <input
+                type="text"
+                name="contestPlayerGym"
+                className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
+                value={currentPlayerInfo.contestPlayerGym}
+                onChange={(e) => handlePlayerInfo(e)}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
+          <div className="flex w-1/4 h-full justify-start items-center ml-5">
+            <span>전화번호</span>
+          </div>
+          <div className="flex w-3/4 h-full justify-start items-center ">
+            <div className="flex w-full gap-x-2 ">
+              <input
+                type="text"
+                name="contestPlayerPhoneNumber"
+                className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
+                value={currentPlayerInfo.contestPlayerPhoneNumber}
+                onChange={(e) => handlePlayerInfo(e)}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
+          <button
+            className="w-full h-10 rounded-lg flex justify-center items-center bg-blue-500 text-white"
+            onClick={() =>
+              handleAddPlayerInfo(
+                currentGradeInfo.id,
+                filteredPlayers.count + 1
+              )
+            }
+          >
+            선수추가
+          </button>
         </div>
         <div className="flex h-full w-full justify-start items-start bg-green-400 p-3 rounded-lg">
           <div className="flex w-full h-full justify-start items-center ">
@@ -417,8 +460,11 @@ const ManualContestOrders = () => {
                   <td className="w-1/4 h-10 flex justify-start items-center ">
                     참가번호
                   </td>
-                  <td className="w-2/4 h-10 flex justify-start items-center ">
+                  <td className="w-1/4 h-10 flex justify-start items-center ">
                     선수이름
+                  </td>
+                  <td className="w-1/4 h-10 flex justify-start items-center ">
+                    소속
                   </td>
                 </th>
                 {filteredPlayers.filtered?.length &&
@@ -430,8 +476,11 @@ const ManualContestOrders = () => {
                       <td className="w-1/4 h-10 flex justify-start items-center ">
                         {player.contestPlayerNumber}
                       </td>
-                      <td className="w-2/4 h-10 flex justify-start items-center ">
+                      <td className="w-1/4 h-10 flex justify-start items-center ">
                         {player.contestPlayerName}
+                      </td>
+                      <td className="w-1/4 h-10 flex justify-start items-center ">
+                        {player.contestPlayerGym}
                       </td>
                     </tr>
                   ))}

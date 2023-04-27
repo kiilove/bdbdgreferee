@@ -73,22 +73,6 @@ const ManualRankingBase = () => {
     return grouped;
   };
 
-  // const fetchedScoreCard = async () => {
-  //   const coditions = [
-  //     where("refCupId", "==", manualRank.id),
-  //     where("refGameId", "==", currentGrade.categoryId),
-  //     where("refClassTitle", "==", currentGrade.gradeTitle),
-  //     where("judgeUid", "==", currentJudgeIndex),
-  //   ];
-  //   console.log(coditions);
-  //   const result = await getScoreCard.getDocuments(
-  //     "manual_rankingboard",
-  //     coditions
-  //   );
-  //   setCurrentScoreCard([...result]);
-  //   console.log(result);
-  // };
-
   useEffect(() => {
     if (manualRank.contestOrders.contestPlayers?.length) {
       const getPlayers = [...manualRank.contestOrders.contestPlayers];

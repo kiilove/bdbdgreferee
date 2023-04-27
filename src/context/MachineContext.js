@@ -8,13 +8,15 @@ export const MachineContextProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("scoreMachineNumber", JSON.stringify(machineNumber));
-    
   }, [machineNumber]);
 
   useMemo(() => {
     const getMachineNumber = localStorage.getItem("scoreMachineNumber");
     if (getMachineNumber) {
-      setMachineNumber(getMachineNumber);
+      const machineNumber = isNaN(parseInt(getMachineNumber))
+        ? 0
+        : parseInt(getMachineNumber);
+      setMachineNumber(machineNumber);
     } else {
       setMachineNumber(0);
     }

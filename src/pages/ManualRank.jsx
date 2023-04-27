@@ -8,6 +8,8 @@ import ManualContestOrders from "./manualComponents/ManualContestOrders";
 import ManualRankingBase from "./manualComponents/ManualRankingBase";
 import ManualRankingReport from "./manualComponents/ManualRankingReport";
 import ManualRankingReportType2 from "./manualComponents/ManualRankingReportType2";
+import ManualRankingReportV2 from "./manualComponents/ManualRankingReportV2";
+import ManualWinnerReportV2 from "./manualComponents/ManualWinnerReportV2";
 
 const ManualRank = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -21,11 +23,8 @@ const ManualRank = () => {
   ];
 
   return (
-    <div
-      className="flex w-full h-screen justify-center"
-      style={{ minWidth: "1000px" }}
-    >
-      <div className="flex w-full flex-col" style={{ maxWidth: "1100px" }}>
+    <div className="flex w-full h-screen justify-center px-10">
+      <div className="flex w-full flex-col">
         <div className="flex w-full">
           <ManualHeader />
         </div>
@@ -48,8 +47,8 @@ const ManualRank = () => {
             {selectedTab === 0 && <ManualContestInfo />}
             {selectedTab === 1 && <ManualContestOrders />}
             {selectedTab === 2 && <ManualRankingBase />}
-            {selectedTab === 3 && <ManualRankingReport />}
-            {selectedTab === 4 && <ManualRankingReportType2 />}
+            {selectedTab === 3 && <ManualRankingReportV2 />}
+            {selectedTab === 4 && <ManualWinnerReportV2 />}
           </div>
         </div>
       </div>

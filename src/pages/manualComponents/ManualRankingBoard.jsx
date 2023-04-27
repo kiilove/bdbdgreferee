@@ -138,6 +138,8 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
           playerUid: item.id,
           playerName: item.contestPlayerName,
           playerNumber: item.contestPlayerNumber,
+          playerIndex: item.contestPlayerIndex,
+          playerGym: item.contestPlayerGym,
           playerRank: prevRank[0]?.playerRank || 0,
           judgeUid: judgeIndex,
           refCupId: getInfo.contestId,
@@ -198,10 +200,7 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
 
   return (
     <div className="flex w-full justify-start items-start mb-44 flex-col">
-      <div
-        className="flex justify-start flex-col w-full"
-        style={{ maxWidth: "850px" }}
-      >
+      <div className="flex justify-start flex-col w-full">
         <div className="flex w-full justify-start items-center flex-col gap-y-2">
           {scrollPosition > 40 ? (
             <div

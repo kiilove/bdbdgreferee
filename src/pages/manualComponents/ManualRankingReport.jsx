@@ -219,13 +219,6 @@ const ManualRankingReport = () => {
                   {key}
                 </button>
               ))}
-              {selectedGroup && (
-                <ul>
-                  {groupedData[selectedGroup].map((item) => (
-                    <li key={item.id}>{item.name}</li>
-                  ))}
-                </ul>
-              )}
             </div>
           )}
         </div>
