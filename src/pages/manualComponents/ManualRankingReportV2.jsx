@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { where } from "firebase/firestore";
+import { orderBy, where } from "firebase/firestore";
 
 import ReactToPrint from "react-to-print";
 import { useContext } from "react";
@@ -45,9 +45,13 @@ const ManualRankingReportV2 = () => {
   };
 
   const fetchRankingboards = async () => {
-    const conditions = [where("refCupId", "==", manualRank.id)];
+    const conditions = [
+      where("refCupId", "==", manualRank.id),
+      orderBy("refGameIndex"),
+      orderBy("refClassIndex"),
+    ];
     const fetchedDatas = await getDatas.getDocuments(
-      "manual_rankingboard",
+      manualRank.contestInfo.contestCollectionName,
       conditions
     );
     console.log(fetchedDatas);
@@ -194,28 +198,38 @@ const ManualRankingReportV2 = () => {
           </thead>
           <tbody>
             {sortedIndex?.length > 0 &&
-              sortedIndex.map((player, pIdx) => (
-                <tr className="table-row-wrapper border-b border-gray-400">
-                  <td className="w-20 h-12 text-center font-semibold">
-                    {player.playerNumber}
-                  </td>
-                  <td className="w-20 h-12 text-center font-semibold">
-                    {player.playerPosition}
-                  </td>
-                  {player.rank.map((rank, rIdx) => (
-                    <td className="w-20 h-12 text-center font-semibold p-2 ">
-                      <div
-                        className={`flex w-full h-full justify-center items-center rounded-2xl ${
-                          rank.isMin && " bg-blue-400"
-                        }  ${rank.isMax && " bg-red-300"}`}
-                      >
-                        {rank.playerRank}
-                      </div>
+              sortedIndex.map((player, pIdx) => {
+                const shouldRender = player.sumScore < 100;
+
+                return shouldRender ? (
+                  <tr
+                    className="table-row-wrapper border-b border-gray-400"
+                    key={player.id}
+                  >
+                    <td className="w-20 h-12 text-center font-semibold">
+                      {player.playerNumber}
                     </td>
-                  ))}
-                  <td className="w-20 h-12 text-center">{player.sumScore}</td>
-                </tr>
-              ))}
+                    <td className="w-20 h-12 text-center font-semibold">
+                      {player.playerPosition}
+                    </td>
+                    {player.rank.map((rank, rIdx) => (
+                      <td
+                        className="w-20 h-12 text-center font-semibold p-2"
+                        key={rIdx}
+                      >
+                        <div
+                          className={`flex w-full h-full justify-center items-center rounded-2xl ${
+                            rank.isMin && " bg-blue-400"
+                          }  ${rank.isMax && " bg-red-300"}`}
+                        >
+                          {rank.playerRank}
+                        </div>
+                      </td>
+                    ))}
+                    <td className="w-20 h-12 text-center">{player.sumScore}</td>
+                  </tr>
+                ) : null;
+              })}
           </tbody>
         </table>
       </div>

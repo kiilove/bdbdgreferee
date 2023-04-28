@@ -170,6 +170,20 @@ const ManualContestInfo = () => {
           />
         </div>
       </div>
+      <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
+        <div className="flex w-1/4 h-full justify-start items-center ml-5">
+          <span>컬렉션이름(임의수정금지)</span>
+        </div>
+        <div className="flex w-3/4 h-full justify-start items-center ">
+          <input
+            type="text"
+            name="contestCollectionName"
+            className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
+            value={contestInfo.contestCollectionName}
+            onChange={(e) => handleContestInfo(e)}
+          />
+        </div>
+      </div>
       <div className="flex h-12 w-full justify-end items-center rounded-lg gap-x-2">
         <button
           className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-400 text-white"

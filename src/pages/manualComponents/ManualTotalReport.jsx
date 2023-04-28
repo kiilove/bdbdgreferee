@@ -7,7 +7,7 @@ import { ManualRankContext } from "../../context/ManualRankContext";
 import { useFirestoreQuery } from "../../customHooks/useFirestores";
 import { Modal } from "@mui/material";
 
-const ManualWinnerReportV2 = () => {
+const ManualTotalReport = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -159,11 +159,32 @@ const ManualWinnerReportV2 = () => {
     return result;
   };
 
+  function getPageCount(content) {
+    const pageHeight = window.innerHeight;
+    const contentHeight = content.offsetHeight;
+    const pageCount = Math.ceil(contentHeight / pageHeight);
+    return pageCount;
+  }
+
+  function getCurrentPage(content) {
+    const pageHeight = window.innerHeight;
+    const contentScrollTop = content.scrollTop;
+    const currentPage = Math.floor(contentScrollTop / pageHeight);
+    return currentPage;
+  }
+
+  const handleBeforePrint = () => {
+    const content = printRef.current;
+    const pageCount = getPageCount(content);
+    const currentPage = getCurrentPage(content);
+    console.log(`Page ${currentPage + 1} of ${pageCount}`);
+  };
+
   useEffect(() => {
     console.log(groupedData);
   }, [groupedData]);
 
-  const RankingTable = React.forwardRef(({ data }, ref) => {
+  const RankingTable = React.forwardRef(({ header, data }, ref) => {
     function sortPlayersByScore(players) {
       const sortedPlayers = players
         .slice()
@@ -187,6 +208,14 @@ const ManualWinnerReportV2 = () => {
       <div className="flex px-8 w-full justify-center">
         <table>
           <thead>
+            <tr>
+              <th
+                className="w-full text-start ml-2 mb-2 h-12 text-lg "
+                colSpan={5}
+              >
+                {header}
+              </th>
+            </tr>
             <tr className="border-b border-gray-800">
               <th className="w-20 h-10 text-base font-bold border border-gray-500">
                 순위
@@ -236,26 +265,7 @@ const ManualWinnerReportV2 = () => {
   return (
     <div className="flex w-full flex-col justify-start h-full items-center px-5 py-2">
       <div className="flex w-full gap-x-5 flex-col">
-        <div className="flex gap-x-5 flex-wrap w-full box-border h-full">
-          {!isLoading && (
-            <div className="flex justify-center items-center gap-2 mb-5 flex-wrap">
-              {Object.keys(groupedData || {}).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => handleGroupChange(key)}
-                  disabled={selectedGroup === key}
-                  className={
-                    selectedGroup === key
-                      ? "bg-green-500 flex p-2  rounded-md"
-                      : "bg-green-200 flex p-2  rounded-md"
-                  }
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="flex gap-x-5 flex-wrap w-full box-border h-full"></div>
         <div className="flex">
           <ReactToPrint
             trigger={() => (
@@ -264,7 +274,28 @@ const ManualWinnerReportV2 = () => {
               </button>
             )}
             content={() => printRef.current}
-            pageStyle="@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
+            onBeforePrint={handleBeforePrint}
+            pageStyle={`
+    @page {
+      size: A4;
+      margin: 0;
+      margin-top: 30px;
+      margin-bottom: 50px;
+    }
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+      }
+      .footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 12px;
+      }
+    }
+  `}
           />
         </div>
         <div
@@ -275,7 +306,7 @@ const ManualWinnerReportV2 = () => {
             className="flex w-full h-full border-2 border-gray-600"
             style={{ maxWidth: "1200px" }}
           >
-            {selectedGroup && (
+            {manualRank && (
               <div className="flex flex-col box-border overflow-y-auto p-3 rounded-md w-full h-full gap-y-3">
                 <div className="flex gap-x-5 w-full">
                   <div className="flex w-full justify-center items-center">
@@ -305,18 +336,22 @@ const ManualWinnerReportV2 = () => {
                     주최 : {manualRank.contestInfo.contestPromoter}
                   </div>
                 </div>
-
-                <div className="flex justify-center items-start flex-col">
-                  <div className="flex w-full h-10 mt-5 px-8">
-                    <h1 className="font-bold text-lg">
-                      종목/체급 : {selectedGroup}
-                    </h1>
-                  </div>
-                  <RankingTable
-                    key={selectedGroup}
-                    data={groupedData[selectedGroup]}
-                  />
-                </div>
+                {groupedData &&
+                  Object.keys(groupedData).map((group, gIdx) => (
+                    <div className="flex justify-center items-start flex-col ">
+                      {/* <div className="flex w-full h-10 mt-5 px-8">
+                        <h1 className="font-bold text-lg">
+                          종목/체급 : {group}
+                        </h1>
+                      </div> */}
+                      <div className="flex ">
+                        <RankingTable
+                          header={group}
+                          data={groupedData[group]}
+                        />
+                      </div>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
@@ -326,4 +361,4 @@ const ManualWinnerReportV2 = () => {
   );
 };
 
-export default ManualWinnerReportV2;
+export default ManualTotalReport;

@@ -9,6 +9,9 @@ import {
   useFirestoreUpdateData,
 } from "../../customHooks/useFirestores";
 import { useRef } from "react";
+import { TiEdit, TiTrash } from "react-icons/ti";
+import { Modal } from "@mui/material";
+import ManualPlayerEdit from "./modals/ManualPlayerEdit";
 
 const ManualContestOrders = () => {
   const [contestCategorys, setContestCategorys] = useState([]);
@@ -24,6 +27,12 @@ const ManualContestOrders = () => {
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isModalOpen3, setIsModalOpen3] = useState(false);
   const [isModalOpen4, setIsModalOpen4] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [editIds, setEditIds] = useState({
+    categoryId: "",
+    gradeId: "",
+    playerId: "",
+  });
   const categoryTitleRef = useRef();
   const gradeTitleRef = useRef();
   const playerOrderNumberRef = useRef();
@@ -89,8 +98,6 @@ const ManualContestOrders = () => {
       contestPlayerIndex: playerIndex,
     };
 
-    console.log(newPlayerInfo);
-
     const newContestPlayers = [...contestPlayers, newPlayerInfo];
     setContestPlayers(newContestPlayers);
     setCurrentPlayerInfo({
@@ -102,7 +109,7 @@ const ManualContestOrders = () => {
       contestPlayerIndex: playerIndex,
     });
 
-    console.log(contestPlayers);
+    playerNumberRef.current.focus();
   };
 
   const handleUpdateCategoryInfo = (refId) => {
@@ -165,6 +172,16 @@ const ManualContestOrders = () => {
     setIsModalOpen4(false);
   };
 
+  const handleDeletePlayers = (refId) => {
+    const newContestPlayers = [...contestPlayers];
+    const findIndexPlayers = newContestPlayers.findIndex(
+      (player) => player.id === refId
+    );
+
+    newContestPlayers.splice(findIndexPlayers, 1);
+    setContestPlayers([...newContestPlayers]);
+  };
+
   const filteredGrades = useMemo(() => {
     let filtered = [];
 
@@ -177,7 +194,7 @@ const ManualContestOrders = () => {
     }
 
     return filtered;
-  }, [contestGrades, currentCategoryInfo.id]);
+  }, [manualRank, contestGrades, currentCategoryInfo.id]);
 
   const filteredPlayers = useMemo(() => {
     let filtered = [];
@@ -191,7 +208,11 @@ const ManualContestOrders = () => {
     }
 
     return { filtered, count };
-  }, [currentGradeInfo.id, currentPlayerInfo]);
+  }, [
+    currentGradeInfo,
+    manualRank.contestOrders.contestPlayers,
+    contestPlayers,
+  ]);
 
   useEffect(() => {
     if (manualRank.contestOrders?.contestCategorys) {
@@ -205,6 +226,13 @@ const ManualContestOrders = () => {
 
   return (
     <div className="flex w-full gap-x-5">
+      <Modal open={editModal} onClose={editModal}>
+        <ManualPlayerEdit
+          payload={editIds.playerId}
+          close={setEditModal}
+          parentState={setContestPlayers}
+        />
+      </Modal>
       <div className="w-1/4 h-full flex flex-col gap-y-2 py-2">
         <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
           <div className="flex w-1/4 h-full justify-start items-center ml-5">
@@ -382,6 +410,7 @@ const ManualContestOrders = () => {
             <input
               type="number"
               name="contestPlayerNumber"
+              ref={playerNumberRef}
               className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
               value={currentPlayerInfo.contestPlayerNumber}
               onChange={(e) => handlePlayerInfo(e)}
@@ -454,33 +483,53 @@ const ManualContestOrders = () => {
             <div className="flex w-full bg-green-500 outline-none h-full px-4 rounded-lg">
               <table className="w-full">
                 <th className="text-sm font-normal w-full flex border-b border-green-300 h-10">
-                  <td className="w-1/4 h-10 flex justify-start items-center ">
+                  <td className="w-1/6 h-10 flex justify-start items-center ">
                     출전순서
                   </td>
-                  <td className="w-1/4 h-10 flex justify-start items-center ">
+                  <td className="w-1/6 h-10 flex justify-start items-center ">
                     참가번호
                   </td>
-                  <td className="w-1/4 h-10 flex justify-start items-center ">
+                  <td className="w-2/6 h-10 flex justify-start items-center ">
                     선수이름
                   </td>
-                  <td className="w-1/4 h-10 flex justify-start items-center ">
+                  <td className="w-3/6 h-10 flex justify-start items-center ">
                     소속
                   </td>
+                  <td className="w-1/6 h-10 flex justify-start items-center "></td>
                 </th>
                 {filteredPlayers.filtered?.length &&
                   filteredPlayers.filtered.map((player, pIdx) => (
                     <tr className="text-sm font-normal w-full flex border-b border-green-400 h-10">
-                      <td className="w-1/4 h-10 flex justify-start items-center ">
+                      <td className="w-1/6 h-10 flex justify-start items-center ">
                         {pIdx + 1}
                       </td>
-                      <td className="w-1/4 h-10 flex justify-start items-center ">
+                      <td className="w-1/6 h-10 flex justify-start items-center ">
                         {player.contestPlayerNumber}
                       </td>
-                      <td className="w-1/4 h-10 flex justify-start items-center ">
+                      <td className="w-2/6 h-10 flex justify-start items-center ">
                         {player.contestPlayerName}
                       </td>
-                      <td className="w-1/4 h-10 flex justify-start items-center ">
+                      <td className="w-3/6 h-10 flex justify-start items-center ">
                         {player.contestPlayerGym}
+                      </td>
+                      <td className="w-1/6 h-10 flex justify-start items-center gap-x-3">
+                        <button
+                          className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                          onClick={() => {
+                            setEditIds({ ...editIds, playerId: player.id });
+                            setEditModal(true);
+                          }}
+                        >
+                          <TiEdit className="text-2xl text-gray-300" />
+                        </button>{" "}
+                        <button
+                          className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                          onClick={() => {
+                            handleDeletePlayers(player.id);
+                          }}
+                        >
+                          <TiTrash className="text-2xl text-gray-300" />
+                        </button>
                       </td>
                     </tr>
                   ))}

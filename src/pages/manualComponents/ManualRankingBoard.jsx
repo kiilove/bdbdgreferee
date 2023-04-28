@@ -20,6 +20,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
+import { ManualRankContext } from "../../context/ManualRankContext";
 
 const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -34,6 +35,8 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   const { manualRankScore, setManualRankScore } = useContext(
     ManualRankScoreContext
   );
+
+  const { manualRank, setManualRank } = useContext(ManualRankContext);
 
   const generateDocuId = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
@@ -51,7 +54,7 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   ) => {
     console.log(judgeId);
     await deleteMatchingDocuments(judgeId, refCupId, refGameId, refClassTitle);
-    await addData("manual_rankingboard", scoreCards);
+    await addData(manualRank.contestInfo.contestCollectionName, scoreCards);
   };
 
   const deleteMatchingDocuments = async (
@@ -61,7 +64,10 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     refClassTitle
   ) => {
     console.log(judgeId);
-    const manualRankingBoardRef = collection(db, "manual_rankingboard");
+    const manualRankingBoardRef = collection(
+      db,
+      manualRank.contestInfo.contestCollectionName
+    );
     const q = query(
       manualRankingBoardRef,
       where("judgeUid", "==", judgeId),
@@ -76,7 +82,9 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
 
     querySnapshot.forEach(async (docSnapshot) => {
       console.log(docSnapshot.id);
-      await deleteDoc(doc(db, "manual_rankingboard", docSnapshot.id));
+      await deleteDoc(
+        doc(db, manualRank.contestInfo.contestCollectionName, docSnapshot.id)
+      );
     });
   };
 
@@ -103,6 +111,7 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   }, []);
 
   const fetchedScoreCard = async () => {
+    console.log("result", manualRank.contestInfo.contestCollectionName);
     const conditions = [
       where("refCupId", "==", getInfo.contestId),
       where("refGameId", "==", getInfo.categoryId),
@@ -111,9 +120,10 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     ];
 
     const result = await getScoreCard.getDocuments(
-      "manual_rankingboard",
+      manualRank.contestInfo.contestCollectionName,
       conditions
     );
+
     return result;
   };
 
@@ -144,7 +154,10 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
           judgeUid: judgeIndex,
           refCupId: getInfo.contestId,
           refGameId: getInfo.categoryId,
+          refGameIndex: getInfo.categoryIndex,
           refGameTitle: getInfo.categoryTitle,
+          refClassId: getInfo.gradeId,
+          refClassIndex: getInfo.gradeIndex,
           refClassTitle: getInfo.gradeTitle,
           refSeatIndex: judgeIndex,
         };
