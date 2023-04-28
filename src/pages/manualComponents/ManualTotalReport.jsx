@@ -270,7 +270,7 @@ const ManualTotalReport = () => {
           <ReactToPrint
             trigger={() => (
               <button className="w-40 h-14 bg-green-500 rounded-lg mb-5">
-                순위표 출력
+                통합 순위표 출력
               </button>
             )}
             content={() => printRef.current}
@@ -314,7 +314,7 @@ const ManualTotalReport = () => {
                       className="flex justify-center items-center h-14 text-3xl font-extrabold font-sans"
                       style={{ letterSpacing: "20px" }}
                     >
-                      순위표
+                      통합순위표
                     </h1>
                   </div>
                 </div>
