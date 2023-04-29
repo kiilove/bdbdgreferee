@@ -12,6 +12,8 @@ import ManualRankingReportV2 from "./manualComponents/ManualRankingReportV2";
 import ManualWinnerReportV2 from "./manualComponents/ManualWinnerReportV2";
 import ManualTotalReport from "./manualComponents/ManualTotalReport";
 import ManualEntryReport from "./manualComponents/ManualEntryReport";
+import ManualEntryByCategoryReport from "./manualComponents/ManualEntryByCategoryReport";
+import ManualScaleHeightByCategoryReport from "./manualComponents/ManualScaleHeightByCategoryReport";
 
 const ManualRank = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -19,13 +21,13 @@ const ManualRank = () => {
   const tabs = [
     { idx: 0, title: "대회정보세팅" },
     { idx: 1, title: "출전선수명단" },
-    { idx: 2, title: "심판배정" },
-    { idx: 3, title: "심사표입력" },
-    { idx: 4, title: "출전명단출력" },
-    { idx: 5, title: "심판배정출력" },
-    { idx: 6, title: "집계표출력" },
-    { idx: 7, title: "개별순위표출력" },
-    { idx: 8, title: "통합순위표출력" },
+    { idx: 2, title: "심사표입력" },
+    { idx: 3, title: "출전통합명단출력" },
+    { idx: 4, title: "출전종목별명단출력" },
+    { idx: 5, title: "집계표출력" },
+    { idx: 6, title: "개별순위표출력" },
+    { idx: 7, title: "통합순위표출력" },
+    { idx: 8, title: "계측명단출력" },
   ];
 
   return (
@@ -52,11 +54,13 @@ const ManualRank = () => {
           <div className="flex w-full h-full bg-green-300 justify-between items-center rounded-lg px-2">
             {selectedTab === 0 && <ManualContestInfo />}
             {selectedTab === 1 && <ManualContestOrders />}
-            {selectedTab === 3 && <ManualRankingBase />}
-            {selectedTab === 4 && <ManualEntryReport />}
-            {selectedTab === 6 && <ManualRankingReportV2 />}
-            {selectedTab === 7 && <ManualWinnerReportV2 />}
-            {selectedTab === 8 && <ManualTotalReport />}
+            {selectedTab === 2 && <ManualRankingBase />}
+            {selectedTab === 3 && <ManualEntryReport />}
+            {selectedTab === 4 && <ManualEntryByCategoryReport />}
+            {selectedTab === 5 && <ManualRankingReportV2 />}
+            {selectedTab === 6 && <ManualWinnerReportV2 />}
+            {selectedTab === 7 && <ManualTotalReport />}
+            {selectedTab === 8 && <ManualScaleHeightByCategoryReport />}
           </div>
         </div>
       </div>
