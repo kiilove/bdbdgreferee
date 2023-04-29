@@ -182,6 +182,32 @@ const ManualContestOrders = () => {
     setContestPlayers([...newContestPlayers]);
   };
 
+  const handleUpdatePlayersNumberPlus = () => {
+    let dummy = [];
+    const newContestPlayers = [...contestPlayers];
+    newContestPlayers.map((player) =>
+      dummy.push({
+        ...player,
+        contestPlayerNumber: parseInt(player.contestPlayerNumber) + 1,
+      })
+    );
+
+    setContestPlayers([...dummy]);
+  };
+
+  const handleUpdatePlayersNumberMinus = () => {
+    let dummy = [];
+    const newContestPlayers = [...contestPlayers];
+    newContestPlayers.map((player) =>
+      dummy.push({
+        ...player,
+        contestPlayerNumber: parseInt(player.contestPlayerNumber) - 1,
+      })
+    );
+
+    setContestPlayers([...dummy]);
+  };
+
   const filteredGrades = useMemo(() => {
     let filtered = [];
 
@@ -538,6 +564,22 @@ const ManualContestOrders = () => {
           </div>
         </div>
         <div className="flex h-12 w-full justify-end items-center rounded-lg gap-x-2">
+          <button
+            className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+            onClick={() => {
+              handleUpdatePlayersNumberMinus();
+            }}
+          >
+            일괄(-1)
+          </button>
+          <button
+            className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+            onClick={() => {
+              handleUpdatePlayersNumberPlus();
+            }}
+          >
+            일괄(+1)
+          </button>
           <button
             className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
             onClick={() => {
