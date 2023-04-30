@@ -130,6 +130,8 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   const initRankBoard = async () => {
     let dummy = [];
     let dummySelected = [];
+    const players = getInfo.players;
+    players.sort((a, b) => a.contestPlayerIndex - b.contestPlayerIndex);
 
     setScoreCards([]);
     setScoreEndPlayers([]);
@@ -138,8 +140,8 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     console.log(fetchedResult);
     console.log(judgeIndex);
 
-    getInfo.players?.length &&
-      getInfo.players.map((item, idx) => {
+    players?.length &&
+      players.map((item, idx) => {
         const prevRank = fetchedResult.filter(
           (score) => score.playerUid === item.id
         );

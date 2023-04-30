@@ -71,6 +71,7 @@ const ManualRankingBase = () => {
 
       groupData.players.push(player);
     });
+    grouped.sort((a, b) => a.categoruIndex - b.categoruIndex);
     setGroupedGradeId(grouped);
     return grouped;
   };
@@ -94,22 +95,24 @@ const ManualRankingBase = () => {
         </div>
         <div className="flex w-full h-full justify-start items-center flex-col gap-y-2">
           {groupedGradeId?.length &&
-            groupedGradeId.map((grouped, gIdx) => (
-              <button
-                className={
-                  grouped.refGradeId === currentGrade.refGradeId
-                    ? "flex w-full bg-green-600 px-3 h-10 justify-start items-center rounded-lg text-white"
-                    : "flex w-full bg-green-500 px-3 h-10 justify-start items-center rounded-lg"
-                }
-                onClick={() => {
-                  setCurrentJudgeIndex(1);
-                  setCurrentGrade({ ...grouped });
-                }}
-              >
-                {grouped.categoryTitle} / {grouped.gradeTitle}(
-                {grouped.players?.length})
-              </button>
-            ))}
+            groupedGradeId
+              .sort((a, b) => a.categoryIndex - b.categoryIndex)
+              .map((grouped, gIdx) => (
+                <button
+                  className={
+                    grouped.refGradeId === currentGrade.refGradeId
+                      ? "flex w-full bg-green-600 px-3 h-10 justify-start items-center rounded-lg text-white"
+                      : "flex w-full bg-green-500 px-3 h-10 justify-start items-center rounded-lg"
+                  }
+                  onClick={() => {
+                    setCurrentJudgeIndex(1);
+                    setCurrentGrade({ ...grouped });
+                  }}
+                >
+                  {grouped.categoryTitle} / {grouped.gradeTitle}(
+                  {grouped.players?.length})
+                </button>
+              ))}
         </div>
       </div>
       <div className="w-3/4 h-full flex flex-col gap-y-2 py-2">

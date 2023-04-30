@@ -10,8 +10,8 @@ const ManualEntryReport = () => {
   console.log(contestOrders);
 
   const playerDataByCategory = contestOrders.contestCategorys.map(
-    (category, categoryIndex) => {
-      const { id, contestCategoryTitle } = category;
+    (category) => {
+      const { id, contestCategoryTitle, contestCategoryIndex } = category;
       console.log(id);
 
       const matchingGrades = contestOrders.contestGrades
@@ -29,7 +29,7 @@ const ManualEntryReport = () => {
       return {
         contestCategoryTitle,
         matchingGrades,
-        categoryIndex,
+        contestCategoryIndex,
       };
     }
   );
@@ -103,9 +103,6 @@ const ManualEntryReport = () => {
                                     <thead>
                                       <tr className="h-10">
                                         <th className="border border-gray-500 w-1/12 text-sm">
-                                          출전순서
-                                        </th>
-                                        <th className="border border-gray-500 w-1/12 text-sm">
                                           선수번호
                                         </th>
                                         <th className="border border-gray-500 w-2/12">
@@ -123,9 +120,6 @@ const ManualEntryReport = () => {
                                       {matching.players.length &&
                                         matching.players.map((player, pIdx) => (
                                           <tr className="h-10">
-                                            <td className="border border-gray-500 text-center">
-                                              {player.contestPlayerIndex}
-                                            </td>
                                             <td className="border border-gray-500 text-center">
                                               {player.contestPlayerNumber}
                                             </td>

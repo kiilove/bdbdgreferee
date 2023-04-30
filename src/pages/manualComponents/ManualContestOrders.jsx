@@ -230,6 +230,7 @@ const ManualContestOrders = () => {
       filtered = contestPlayers.filter(
         (filter) => filter.refGradeId === currentGradeInfo.id
       );
+
       count = filtered.length;
     }
 
