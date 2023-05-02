@@ -106,6 +106,7 @@ const ManualScaleHeightByCategoryReport = () => {
         text-align: center;
         font-size: 12px;
       }
+      .page-break { page-break-inside:avoid; page-break-after:auto }
     }
   `}
           />
@@ -131,7 +132,7 @@ const ManualScaleHeightByCategoryReport = () => {
                           {category.matchingGrades.length &&
                             category.matchingGrades.map((matching, mIdx) => {
                               return (
-                                <div className="flex flex-col w-full">
+                                <div className="flex flex-col w-full page-break">
                                   <div className="flex h-10 justify-start items-end mb-2">
                                     <h1 className="text-lg font-semibold">
                                       {category.contestCategoryTitle}(
@@ -165,7 +166,7 @@ const ManualScaleHeightByCategoryReport = () => {
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      {matching.players.length &&
+                                      {matching.players.length > 0 &&
                                         matching.players.map((player, pIdx) => {
                                           let startNumber = 1;
                                           const prePlayerCount =
@@ -193,21 +194,14 @@ const ManualScaleHeightByCategoryReport = () => {
                                               0
                                             );
 
-                                          if (category.categoryIndex <= 0) {
-                                            console.log("??");
-                                            startNumber = 1;
-                                          } else {
-                                            startNumber =
-                                              category.categoryIndex +
-                                              1 +
-                                              playersCount;
-                                          }
-                                          console.log(
-                                            "cate",
-                                            category.categoryIndex
-                                          );
-                                          console.log("pre", playersCount);
-                                          console.log("start", startNumber);
+                                          // if (category.categoryIndex <= 0) {
+                                          //   startNumber = 1;
+                                          // } else {
+                                          //   startNumber =
+                                          //     category.categoryIndex +
+                                          //     1 +
+                                          //     playersCount;
+                                          // }
 
                                           return (
                                             <tr className="h-10">

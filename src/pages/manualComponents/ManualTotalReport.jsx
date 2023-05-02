@@ -2,11 +2,25 @@ import React, { useState, useEffect, useRef } from "react";
 import { orderBy, where } from "firebase/firestore";
 
 import ReactToPrint from "react-to-print";
+
 import { useContext } from "react";
 import { ManualRankContext } from "../../context/ManualRankContext";
 import { useFirestoreQuery } from "../../customHooks/useFirestores";
 import { Modal } from "@mui/material";
 
+function getPageCount(content) {
+  const pageHeight = window.innerHeight;
+  const contentHeight = content?.offsetHeight;
+  const pageCount = Math.ceil(contentHeight / pageHeight);
+  return pageCount;
+}
+
+function getCurrentPage(content) {
+  const pageHeight = window.innerHeight;
+  const contentScrollTop = content?.scrollTop;
+  const currentPage = Math.floor(contentScrollTop / pageHeight);
+  return currentPage;
+}
 const ManualTotalReport = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -159,30 +173,26 @@ const ManualTotalReport = () => {
     return result;
   };
 
-  function getPageCount(content) {
-    const pageHeight = window.innerHeight;
-    const contentHeight = content.offsetHeight;
-    const pageCount = Math.ceil(contentHeight / pageHeight);
-    return pageCount;
-  }
-
-  function getCurrentPage(content) {
-    const pageHeight = window.innerHeight;
-    const contentScrollTop = content.scrollTop;
-    const currentPage = Math.floor(contentScrollTop / pageHeight);
-    return currentPage;
-  }
-
   const handleBeforePrint = () => {
     const content = printRef.current;
     const pageCount = getPageCount(content);
     const currentPage = getCurrentPage(content);
-    console.log(`Page ${currentPage + 1} of ${pageCount}`);
+    const footer = document.createElement("div");
+    footer.classList.add("footer");
+    footer.textContent = `Page ${currentPage + 1} of ${pageCount}`;
+    content.appendChild(footer);
   };
 
   useEffect(() => {
     console.log(groupedData);
   }, [groupedData]);
+
+  useEffect(() => {
+    window.onbeforeprint = handleBeforePrint;
+    return () => {
+      window.onbeforeprint = null;
+    };
+  }, [printRef]);
 
   const RankingTable = React.forwardRef(({ header, data }, ref) => {
     function sortPlayersByScore(players) {
@@ -205,7 +215,7 @@ const ManualTotalReport = () => {
     ].sort();
 
     return (
-      <div className="flex px-8 w-full justify-center">
+      <div className="flex px-8 w-full justify-center page-break">
         <table>
           <thead>
             <tr>
@@ -294,6 +304,7 @@ const ManualTotalReport = () => {
         text-align: center;
         font-size: 12px;
       }
+      .page-break { page-break-inside:avoid; page-break-after:auto }
     }
   `}
           />
@@ -303,56 +314,59 @@ const ManualTotalReport = () => {
           ref={printRef}
         >
           <div
-            className="flex w-full h-full border-2 border-gray-600"
+            className="flex w-full h-full  border-gray-600"
             style={{ maxWidth: "1200px" }}
           >
             {manualRank && (
-              <div className="flex flex-col box-border overflow-y-auto p-3 rounded-md w-full h-full gap-y-3">
-                <div className="flex gap-x-5 w-full">
-                  <div className="flex w-full justify-center items-center">
-                    <h1
-                      className="flex justify-center items-center h-14 text-3xl font-extrabold font-sans"
-                      style={{ letterSpacing: "20px" }}
-                    >
-                      통합순위표
-                    </h1>
+              <>
+                <div className="flex flex-col box-border overflow-y-auto p-3 rounded-md w-full h-full gap-y-3">
+                  <div className="flex gap-x-5 w-full">
+                    <div className="flex w-full justify-center items-center">
+                      <h1
+                        className="flex justify-center items-center h-14 text-3xl font-extrabold font-sans"
+                        style={{ letterSpacing: "20px" }}
+                      >
+                        통합순위표
+                      </h1>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-x-5 w-full px-8">
-                  <div className="flex w-full">
-                    <h1>대회명 : {manualRank.contestInfo.contestTitle}</h1>
+                  <div className="flex gap-x-5 w-full px-8">
+                    <div className="flex w-full">
+                      <h1>대회명 : {manualRank.contestInfo.contestTitle}</h1>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-x-5 w-full px-8">
-                  <div className="flex w-1/2">
-                    대회일자 : {manualRank.contestInfo.contestDate}
+                  <div className="flex gap-x-5 w-full px-8">
+                    <div className="flex w-1/2">
+                      대회일자 : {manualRank.contestInfo.contestDate}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-x-5 w-full px-8">
-                  <div className="flex w-1/2">
-                    <h1>주관 : {manualRank.contestInfo.contestAssociate}</h1>
+                  <div className="flex gap-x-5 w-full px-8">
+                    <div className="flex w-1/2">
+                      <h1>주관 : {manualRank.contestInfo.contestAssociate}</h1>
+                    </div>
+                    <div className="flex w-1/2  px-8">
+                      주최 : {manualRank.contestInfo.contestPromoter}
+                    </div>
                   </div>
-                  <div className="flex w-1/2  px-8">
-                    주최 : {manualRank.contestInfo.contestPromoter}
-                  </div>
-                </div>
-                {groupedData &&
-                  Object.keys(groupedData).map((group, gIdx) => (
-                    <div className="flex justify-center items-start flex-col ">
-                      {/* <div className="flex w-full h-10 mt-5 px-8">
+                  {groupedData &&
+                    Object.keys(groupedData).map((group, gIdx) => (
+                      <div className="flex justify-center items-start flex-col ">
+                        {/* <div className="flex w-full h-10 mt-5 px-8">
                         <h1 className="font-bold text-lg">
                           종목/체급 : {group}
                         </h1>
                       </div> */}
-                      <div className="flex ">
-                        <RankingTable
-                          header={group}
-                          data={groupedData[group]}
-                        />
+                        <div className="flex ">
+                          <RankingTable
+                            header={group}
+                            data={groupedData[group]}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-              </div>
+                    ))}
+                </div>
+                
+              </>
             )}
           </div>
         </div>

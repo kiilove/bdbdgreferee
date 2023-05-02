@@ -49,6 +49,7 @@ const ManualContestOrders = () => {
     });
   };
 
+  const contestPlayersRef = useRef(null);
   const handleGradeInfo = (e) => {
     setCurrentGradeInfo({
       ...currentGradeInfo,
@@ -64,20 +65,35 @@ const ManualContestOrders = () => {
   };
 
   const handleAddCategoryInfo = (id) => {
-    const newCategoryInfo = { id: uuidv4(), ...currentCategoryInfo };
+    let newId = id;
+    if (newId === currentCategoryInfo.id) {
+      newId = uuidv4();
+    }
+    console.log(newId);
+    const newCategoryInfo = {
+      ...currentCategoryInfo,
+      id: newId,
+      categoryIndex: contestCategorys.length + 1 || 1,
+    };
+    console.log(newCategoryInfo);
     const newContestCategorys = [...contestCategorys, newCategoryInfo];
     setContestCategorys(newContestCategorys);
     setCurrentCategoryInfo({ contestCategoryTitle: "", id: uuidv4() });
     categoryTitleRef.current.focus();
   };
 
-  const handleAddGradeInfo = (refId) => {
+  const handleAddGradeInfo = (refId, id) => {
+    let newId = id;
     if (!refId) {
       return;
     }
+    if (newId === currentGradeInfo.id) {
+      newId = uuidv4();
+    }
     const newGradeInfo = {
-      id: uuidv4(),
       ...currentGradeInfo,
+      id: newId,
+      gradeIndex: filteredGrades.count + 1 || 1,
       refCategoryId: refId,
     };
     const newContestGrades = [...contestGrades, newGradeInfo];
@@ -210,7 +226,7 @@ const ManualContestOrders = () => {
 
   const filteredGrades = useMemo(() => {
     let filtered = [];
-
+    let count = 0;
     if (contestGrades?.length) {
       if (currentCategoryInfo.id) {
         filtered = contestGrades.filter(
@@ -218,8 +234,9 @@ const ManualContestOrders = () => {
         );
       }
     }
-
-    return filtered;
+    filtered.sort((a, b) => a.gradeIndex - b.gradeIndex);
+    count = filtered.length;
+    return { filtered, count };
   }, [manualRank, contestGrades, currentCategoryInfo.id]);
 
   const filteredPlayers = useMemo(() => {
@@ -230,16 +247,32 @@ const ManualContestOrders = () => {
       filtered = contestPlayers.filter(
         (filter) => filter.refGradeId === currentGradeInfo.id
       );
-
+      filtered.sort((a, b) => a.contestPlayerIndex - b.contestPlayerIndex);
       count = filtered.length;
     }
 
     return { filtered, count };
-  }, [
-    currentGradeInfo,
-    manualRank.contestOrders.contestPlayers,
-    contestPlayers,
-  ]);
+  }, [currentGradeInfo, contestPlayers]);
+
+  const handleRefreshPlayerIndex = () => {
+    const newPlayers = [...contestPlayers];
+
+    newPlayers
+      .filter((filter) => filter.refGradeId === currentGradeInfo.id)
+      .map((player, pIdx) => {
+        const index = newPlayers.findIndex(
+          (p) => p.id === player.id && p.refGradeId === currentGradeInfo.id
+        );
+        if (index !== -1) {
+          newPlayers.splice(index, 1, {
+            ...player,
+            contestPlayerIndex: pIdx + 1,
+          });
+        }
+      });
+
+    setContestPlayers([...newPlayers]);
+  };
 
   useEffect(() => {
     if (manualRank.contestOrders?.contestCategorys) {
@@ -301,19 +334,21 @@ const ManualContestOrders = () => {
                   </td>
                 </th>
                 {contestCategorys?.length &&
-                  contestCategorys.map((category, cIdx) => (
-                    <tr
-                      className="text-sm font-normal w-full flex border-b border-green-400 h-10"
-                      onClick={() => setCurrentCategoryInfo({ ...category })}
-                    >
-                      <td className="w-1/3 h-10 flex justify-start items-center ">
-                        {cIdx + 1}
-                      </td>
-                      <td className="w-2/3 h-10 flex justify-start items-center ">
-                        {category.contestCategoryTitle}
-                      </td>
-                    </tr>
-                  ))}
+                  contestCategorys
+                    .sort((a, b) => a.categoryIndex - b.categoryIndex)
+                    .map((category, cIdx) => (
+                      <tr
+                        className="text-sm font-normal w-full flex border-b border-green-400 h-10"
+                        onClick={() => setCurrentCategoryInfo({ ...category })}
+                      >
+                        <td className="w-1/3 h-10 flex justify-start items-center ">
+                          {category.categoryIndex}
+                        </td>
+                        <td className="w-2/3 h-10 flex justify-start items-center ">
+                          {category.contestCategoryTitle}
+                        </td>
+                      </tr>
+                    ))}
               </table>
             </div>
           </div>
@@ -366,20 +401,22 @@ const ManualContestOrders = () => {
                     체급명
                   </td>
                 </th>
-                {filteredGrades?.length &&
-                  filteredGrades.map((grade, gIdx) => (
-                    <tr
-                      className="text-sm font-normal w-full flex border-b border-green-400 h-10"
-                      onClick={() => setCurrentGradeInfo(grade)}
-                    >
-                      <td className="w-1/3 h-10 flex justify-start items-center ">
-                        {gIdx + 1}
-                      </td>
-                      <td className="w-2/3 h-10 flex justify-start items-center ">
-                        {grade.contestGradeTitle}
-                      </td>
-                    </tr>
-                  ))}
+                {filteredGrades.filtered?.length &&
+                  filteredGrades.filtered
+                    .sort((a, b) => a.gradeIndex - b.gradeIndex)
+                    .map((grade, gIdx) => (
+                      <tr
+                        className="text-sm font-normal w-full flex border-b border-green-400 h-10"
+                        onClick={() => setCurrentGradeInfo(grade)}
+                      >
+                        <td className="w-1/3 h-10 flex justify-start items-center ">
+                          {grade.gradeIndex}
+                        </td>
+                        <td className="w-2/3 h-10 flex justify-start items-center ">
+                          {grade.contestGradeTitle}
+                        </td>
+                      </tr>
+                    ))}
               </table>
             </div>
           </div>
@@ -528,7 +565,7 @@ const ManualContestOrders = () => {
                   filteredPlayers.filtered.map((player, pIdx) => (
                     <tr className="text-sm font-normal w-full flex border-b border-green-400 h-10">
                       <td className="w-1/6 h-10 flex justify-start items-center ">
-                        {pIdx + 1}
+                        {player.contestPlayerIndex}
                       </td>
                       <td className="w-1/6 h-10 flex justify-start items-center ">
                         {player.contestPlayerNumber}
@@ -565,6 +602,14 @@ const ManualContestOrders = () => {
           </div>
         </div>
         <div className="flex h-12 w-full justify-end items-center rounded-lg gap-x-2">
+          <button
+            className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+            onClick={() => {
+              handleRefreshPlayerIndex();
+            }}
+          >
+            선수순서갱신
+          </button>
           <button
             className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
             onClick={() => {

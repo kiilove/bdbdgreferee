@@ -11,7 +11,7 @@ const ManualEntryReport = () => {
 
   const playerDataByCategory = contestOrders.contestCategorys.map(
     (category) => {
-      const { id, contestCategoryTitle, contestCategoryIndex } = category;
+      const { id, contestCategoryTitle, categoryIndex } = category;
       console.log(id);
 
       const matchingGrades = contestOrders.contestGrades
@@ -29,7 +29,7 @@ const ManualEntryReport = () => {
       return {
         contestCategoryTitle,
         matchingGrades,
-        contestCategoryIndex,
+        categoryIndex,
       };
     }
   );
@@ -68,6 +68,7 @@ const ManualEntryReport = () => {
         text-align: center;
         font-size: 12px;
       }
+      .page-break { page-break-inside:avoid; page-break-after:auto }
     }
   `}
           />
@@ -86,60 +87,72 @@ const ManualEntryReport = () => {
               <div className="flex w-full justify-center">
                 <div className="flex flex-col w-full">
                   {playerDataByCategory?.length &&
-                    playerDataByCategory.map((category, cIdx) => {
-                      return (
-                        <div className="flex flex-col w-full mb-10">
-                          {category.matchingGrades.length &&
-                            category.matchingGrades.map((matching, mIdx) => {
-                              return (
-                                <div className="flex flex-col w-full">
-                                  <div className="flex h-10 justify-start items-end mb-2">
-                                    <h1 className="text-lg font-semibold">
-                                      {category.contestCategoryTitle}(
-                                      {matching.contestGradeTitle})
-                                    </h1>
-                                  </div>
-                                  <table className="w-full border border-b-2 border-r-2 border-gray-500">
-                                    <thead>
-                                      <tr className="h-10">
-                                        <th className="border border-gray-500 w-1/12 text-sm">
-                                          선수번호
-                                        </th>
-                                        <th className="border border-gray-500 w-2/12">
-                                          이름
-                                        </th>
-                                        <th className="border border-gray-500 w-4/12">
-                                          소속
-                                        </th>
-                                        <th className="border border-gray-500 w-4/12">
-                                          비고
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {matching.players.length &&
-                                        matching.players.map((player, pIdx) => (
+                    playerDataByCategory
+                      .sort((a, b) => a.categoryIndex - b.categoryIndex)
+                      .map((category, cIdx) => {
+                        return (
+                          <div className="flex flex-col w-full mb-10">
+                            {category.matchingGrades.length &&
+                              category.matchingGrades.map((matching, mIdx) => {
+                                if (matching.players?.length > 0) {
+                                  return (
+                                    <div className="flex flex-col w-full page-break ">
+                                      <div className="flex h-10 justify-start items-end mb-2">
+                                        <h1 className="text-lg font-semibold">
+                                          {category.contestCategoryTitle}(
+                                          {matching.contestGradeTitle})
+                                        </h1>
+                                      </div>
+                                      <table className="w-full border border-b-2 border-r-2 border-gray-500">
+                                        <thead>
                                           <tr className="h-10">
-                                            <td className="border border-gray-500 text-center">
-                                              {player.contestPlayerNumber}
-                                            </td>
-                                            <td className="border border-gray-500 text-center">
-                                              {player.contestPlayerName}
-                                            </td>
-                                            <td className="border border-gray-500 text-center">
-                                              {player.contestPlayerGym}
-                                            </td>
-                                            <td className="border border-gray-500 text-center"></td>
+                                            <th className="border border-gray-500 w-1/12 text-sm">
+                                              출전순서
+                                            </th>
+                                            <th className="border border-gray-500 w-1/12 text-sm">
+                                              선수번호
+                                            </th>
+                                            <th className="border border-gray-500 w-2/12">
+                                              이름
+                                            </th>
+                                            <th className="border border-gray-500 w-4/12">
+                                              소속
+                                            </th>
+                                            <th className="border border-gray-500 w-4/12">
+                                              비고
+                                            </th>
                                           </tr>
-                                        ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              );
-                            })}
-                        </div>
-                      );
-                    })}
+                                        </thead>
+                                        <tbody>
+                                          {matching.players.length &&
+                                            matching.players.map(
+                                              (player, pIdx) => (
+                                                <tr className="h-10">
+                                                  <td className="border border-gray-500 text-center">
+                                                    {player.contestPlayerIndex}
+                                                  </td>
+                                                  <td className="border border-gray-500 text-center">
+                                                    {player.contestPlayerNumber}
+                                                  </td>
+                                                  <td className="border border-gray-500 text-center">
+                                                    {player.contestPlayerName}
+                                                  </td>
+                                                  <td className="border border-gray-500 text-center">
+                                                    {player.contestPlayerGym}
+                                                  </td>
+                                                  <td className="border border-gray-500 text-center"></td>
+                                                </tr>
+                                              )
+                                            )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  );
+                                }
+                              })}
+                          </div>
+                        );
+                      })}
                 </div>
               </div>
             </div>

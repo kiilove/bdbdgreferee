@@ -71,7 +71,7 @@ const ManualList = () => {
         <div className="flex w-full h-full gap-2 flex-wrap box-border">
           {contestList?.length &&
             contestList.map((contest, cIdx) => (
-              <div className="flex w-44 h-14 bg-blue-300 flex-col justify-center items-center rounded-lg shadow-lg">
+              <div className="flex px-5 w-auto h-14 bg-blue-300 flex-col justify-center items-center rounded-lg shadow-lg">
                 <button
                   className="flex text-gray-800"
                   onClick={() => handleEditContest(contest.id)}

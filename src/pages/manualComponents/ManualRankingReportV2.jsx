@@ -151,7 +151,7 @@ const ManualRankingReportV2 = () => {
 
       if (group.rank.length > 2) {
         group.sumScore = isSameRank
-          ? totalRank
+          ? totalRank - minRank * 2
           : totalRank - (minRank + maxRank);
       } else {
         group.sumScore = totalRank;

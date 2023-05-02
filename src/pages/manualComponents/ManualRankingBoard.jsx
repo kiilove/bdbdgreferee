@@ -89,6 +89,20 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   };
 
   const addData = async (collectionName, newData, callback) => {
+    const undefinedKeys = [];
+
+    newData.forEach((data) => {
+      Object.keys(data).forEach((key) => {
+        if (data[key] === undefined) {
+          undefinedKeys.push(key);
+        }
+      });
+    });
+
+    if (undefinedKeys.length > 0) {
+      alert(`해당 키값을 받아오지 못했습니다.: ${undefinedKeys.join(", ")}`);
+      return;
+    }
     try {
       const dbBatch = writeBatch(db);
 
@@ -106,9 +120,6 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
   const updateScroll = () => {
     setScrollPosition(window.scrollY || document.documentElement.scrollTop);
   };
-  useEffect(() => {
-    window.addEventListener("scroll", updateScroll);
-  }, []);
 
   const fetchedScoreCard = async () => {
     console.log("result", manualRank.contestInfo.contestCollectionName);
@@ -217,37 +228,17 @@ const ManualRankingBoard = ({ getInfo, judgeIndex }) => {
     <div className="flex w-full justify-start items-start mb-44 flex-col">
       <div className="flex justify-start flex-col w-full">
         <div className="flex w-full justify-start items-center flex-col gap-y-2">
-          {scrollPosition > 40 ? (
-            <div
-              className="flex rounded-md gap-x-2 sticky bg-green-400 justify-center items-center w-full transition-opacity ease-in-out "
-              style={{ top: "150px", height: "50px" }}
-            >
-              <div className="flex w-24 h-10 justify-center items-center bg-white rounded-lg ">
-                <span className="text-sm">선수번호</span>
-              </div>
-              <div className="flex w-24 h-10 justify-center items-center bg-white rounded-lg ">
-                <span className="text-sm">순위</span>
-              </div>
-              <div className="flex w-full h-10 justify-center items-center bg-white rounded-lg ">
-                <span className="text-sm">순위선택</span>
-              </div>
+          <div className="flex w-full rounded-md gap-x-2 justify-center items-center">
+            <div className="flex w-24 h-10 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
+              <span className="text-sm">선수번호</span>
             </div>
-          ) : (
-            <div
-              className="flex w-full rounded-md gap-x-2 sticky bg-white justify-center items-center"
-              style={{ top: "150px", height: "50px" }}
-            >
-              <div className="flex w-24 h-10 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
-                <span className="text-sm">선수번호</span>
-              </div>
-              <div className="flex w-24 h-10 justify-center items-center bg-green-400 rounded-lg border border-gray-200">
-                <span className="text-sm">순위</span>
-              </div>
-              <div className="flex w-full h-10 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
-                <span className="text-sm">순위선택</span>
-              </div>
+            <div className="flex w-24 h-10 justify-center items-center bg-green-400 rounded-lg border border-gray-200">
+              <span className="text-sm">순위</span>
             </div>
-          )}
+            <div className="flex w-full h-10 justify-center items-center bg-green-200 rounded-lg border border-gray-200">
+              <span className="text-sm">순위선택</span>
+            </div>
+          </div>
           <div className="flex h-full rounded-md gap-y-2 flex-col w-full">
             {scoreCards.length > 0 &&
               scoreCards.map((rank, rIdx) => (

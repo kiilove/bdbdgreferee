@@ -69,7 +69,7 @@ const ManualPlayerEdit = ({ payload, close, parentState }) => {
         <div className="flex w-3/4 h-full justify-start items-center ">
           <input
             type="number"
-            name="contestOrderNumber"
+            name="contestPlayerIndex"
             className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
             value={currentPlayerInfo.contestPlayerIndex}
             onChange={(e) => handlePlayerInfo(e)}
