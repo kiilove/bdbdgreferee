@@ -178,21 +178,14 @@ const ManualTotalReport = () => {
     const pageCount = getPageCount(content);
     const currentPage = getCurrentPage(content);
     const footer = document.createElement("div");
-    footer.classList.add("footer");
-    footer.textContent = `Page ${currentPage + 1} of ${pageCount}`;
-    content.appendChild(footer);
+    // footer.classList.add("footer");
+    // footer.textContent = `Page ${currentPage + 1} of ${pageCount}`;
+    // content.appendChild(footer);
   };
 
   useEffect(() => {
     console.log(groupedData);
   }, [groupedData]);
-
-  useEffect(() => {
-    window.onbeforeprint = handleBeforePrint;
-    return () => {
-      window.onbeforeprint = null;
-    };
-  }, [printRef]);
 
   const RankingTable = React.forwardRef(({ header, data }, ref) => {
     function sortPlayersByScore(players) {
@@ -215,8 +208,8 @@ const ManualTotalReport = () => {
     ].sort();
 
     return (
-      <div className="flex px-8 w-full justify-center page-break">
-        <table>
+      <div className="flex px-0 w-full justify-center page-break">
+        <table className="w-full">
           <thead>
             <tr>
               <th
@@ -330,33 +323,33 @@ const ManualTotalReport = () => {
                       </h1>
                     </div>
                   </div>
-                  <div className="flex gap-x-5 w-full px-8">
+                  <div className="flex gap-x-5 w-full px-0">
                     <div className="flex w-full">
                       <h1>대회명 : {manualRank.contestInfo.contestTitle}</h1>
                     </div>
                   </div>
-                  <div className="flex gap-x-5 w-full px-8">
+                  <div className="flex gap-x-5 w-full px-0">
                     <div className="flex w-1/2">
                       대회일자 : {manualRank.contestInfo.contestDate}
                     </div>
                   </div>
-                  <div className="flex gap-x-5 w-full px-8">
+                  <div className="flex gap-x-5 w-full px-0">
                     <div className="flex w-1/2">
                       <h1>주관 : {manualRank.contestInfo.contestAssociate}</h1>
                     </div>
-                    <div className="flex w-1/2  px-8">
+                    <div className="flex w-full  px-0">
                       주최 : {manualRank.contestInfo.contestPromoter}
                     </div>
                   </div>
                   {groupedData &&
                     Object.keys(groupedData).map((group, gIdx) => (
-                      <div className="flex justify-center items-start flex-col ">
+                      <div className="flex justify-center items-start flex-col w-full ">
                         {/* <div className="flex w-full h-10 mt-5 px-8">
                         <h1 className="font-bold text-lg">
                           종목/체급 : {group}
                         </h1>
                       </div> */}
-                        <div className="flex ">
+                        <div className="flex w-full">
                           <RankingTable
                             header={group}
                             data={groupedData[group]}
@@ -365,7 +358,6 @@ const ManualTotalReport = () => {
                       </div>
                     ))}
                 </div>
-                
               </>
             )}
           </div>
