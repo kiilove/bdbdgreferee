@@ -38,8 +38,7 @@ const ManualPlayerEdit = ({ payload, close, parentState }) => {
             (player) => player.refGradeId === nextGradeId
           )?.length + 1;
       }
-      console.log(enableGradeChange);
-      console.log(nextGradeId);
+
       return { result: enableGradeChange, nextGradeId, nextPlayerIndex };
     }
   };
