@@ -8,6 +8,7 @@ import { useEffect } from "react";
 const ManualScaleHeightByCategoryReport = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState();
+  const [selectedSection, setSelectedSection] = useState(0);
   const { manualRank } = useContext(ManualRankContext);
   const printRef = useRef();
   const contestOrders = manualRank.contestOrders;
@@ -15,8 +16,7 @@ const ManualScaleHeightByCategoryReport = () => {
   if (contestOrders) {
     playerDataByCategory = contestOrders?.contestCategorys.map(
       (category, categoryIndex) => {
-        const { id, contestCategoryTitle } = category;
-        console.log(id);
+        const { id, contestCategoryTitle, categorySection } = category;
 
         const matchingGrades = contestOrders.contestGrades
           .filter((grade) => grade.refCategoryId === id)
@@ -28,18 +28,17 @@ const ManualScaleHeightByCategoryReport = () => {
             .filter((player) => player.refGradeId === grade.id)
             .sort((a, b) => a.contestPlayerIndex - b.contestPlayerIndex);
         });
-        console.log("체급", matchingGrades);
 
         return {
           contestCategoryTitle,
           matchingGrades,
           categoryIndex,
+          categorySection,
         };
       }
     );
 
     playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
-    console.log("playerDataByCategory", playerDataByCategory);
   }
 
   useEffect(() => {
@@ -59,10 +58,64 @@ const ManualScaleHeightByCategoryReport = () => {
     setFilteredData([...newFilteredData]);
   }, [selectedCategory]);
 
+  useEffect(() => {
+    console.log(selectedSection);
+    if (selectedSection !== 0 && selectedSection <= 4) {
+      const newFilteredData = playerDataByCategory.filter(
+        (filter) => filter.categorySection === selectedSection
+      );
+      console.log(playerDataByCategory);
+      console.log(newFilteredData);
+
+      setFilteredData([...newFilteredData]);
+    }
+  }, [selectedSection]);
+
   return (
     <div className="flex w-full flex-col justify-start h-full items-center px-5 py-2">
       <div className="flex w-full gap-x-5 flex-col">
-        <div className="flex justify-center items-center gap-2 mb-5 flex-wrap">
+        <div className="flex justify-start items-center gap-2 mb-5 flex-wrap">
+          <button
+            className={
+              selectedSection === 1
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(1);
+              setSelectedCategory("1부");
+            }}
+          >
+            1부전체
+          </button>
+          <button
+            className={
+              selectedSection === 2
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(2);
+              setSelectedCategory("2부");
+            }}
+          >
+            2부전체
+          </button>
+          <button
+            className={
+              selectedSection === 3
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(3);
+              setSelectedCategory("3부");
+            }}
+          >
+            3부전체
+          </button>
+        </div>
+        <div className="flex justify-start items-center gap-2 mb-5 flex-wrap">
           <button onClick={() => setSelectedCategory("통합")}>통합</button>
           {contestOrders?.contestCategorys &&
             contestOrders.contestCategorys.map((category, cIdx) => (
@@ -130,7 +183,7 @@ const ManualScaleHeightByCategoryReport = () => {
                     filteredData.map((category, cIdx) => {
                       return (
                         <div className="flex flex-col w-full mb-10">
-                          {category.matchingGrades.length &&
+                          {category.matchingGrades.length > 0 &&
                             category.matchingGrades.map((matching, mIdx) => {
                               return (
                                 <div className="flex flex-col w-full page-break">

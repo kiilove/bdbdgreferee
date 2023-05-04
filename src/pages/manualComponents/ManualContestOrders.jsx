@@ -23,6 +23,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
+import ManualGradeEdit from "./modals/ManualGradeEdit";
 
 const ManualContestOrders = () => {
   const [contestCategorys, setContestCategorys] = useState([]);
@@ -145,42 +146,58 @@ const ManualContestOrders = () => {
 
     playerNumberRef.current.focus();
   };
-  const deleteCategoryMatchingDocuments = async (refCupId, refGameId) => {
-    const manualRankingBoardRef = collection(
-      db,
-      manualRank.contestInfo.contestCollectionName
-    );
-    const q = query(
-      manualRankingBoardRef,
-      where("refCupId", "==", refCupId),
-      where("refGameId", "==", refGameId)
-    );
 
-    const querySnapshot = await getDocs(q);
-
-    querySnapshot.forEach(async (docSnapshot) => {
-      await deleteDoc(
-        doc(db, manualRank.contestInfo.contestCollectionName, docSnapshot.id)
-      );
-    });
-  };
-
-  const handleDeleteCategoryInfo = async (refId) => {
-    await deleteCategoryMatchingDocuments(manualRank.id, refId);
+  const handleDeleteCategoryInfo = (refId) => {
+    // await deleteCategoryMatchingDocuments(manualRank.id, refId);
     const newContestCategorys = [...contestCategorys];
     const findCategoryIndex = newContestCategorys.findIndex(
       (find) => find.id === refId
     );
-    newContestCategorys.splice(findCategoryIndex, 1);
+    const newContestCategory = {
+      ...newContestCategorys[findCategoryIndex],
+      isActive: false,
+    };
+    newContestCategorys.splice(findCategoryIndex, 1, newContestCategory);
     setContestCategorys([...newContestCategorys]);
   };
 
-  const handleDeleteGradeInfo = (refTitle) => {
+  const handleUnDeleteCategoryInfo = (refId) => {
+    // await deleteCategoryMatchingDocuments(manualRank.id, refId);
+    const newContestCategorys = [...contestCategorys];
+    const findCategoryIndex = newContestCategorys.findIndex(
+      (find) => find.id === refId
+    );
+    const newContestCategory = {
+      ...newContestCategorys[findCategoryIndex],
+      isActive: true,
+    };
+    newContestCategorys.splice(findCategoryIndex, 1, newContestCategory);
+    setContestCategorys([...newContestCategorys]);
+  };
+
+  const handleDeleteGradeInfo = (refId) => {
     const newContestGrades = [...contestGrades];
     const findGradeIndex = newContestGrades.findIndex(
-      (find) => find.contestGradeTitle === refTitle
+      (find) => find.id === refId
     );
-    newContestGrades.splice(findGradeIndex, 1);
+    const newContestGrade = {
+      ...newContestGrades[findGradeIndex],
+      isActive: false,
+    };
+    newContestGrades.splice(findGradeIndex, 1, newContestGrade);
+    setContestGrades([...newContestGrades]);
+  };
+
+  const handleUnDeleteGradeInfo = (refId) => {
+    const newContestGrades = [...contestGrades];
+    const findGradeIndex = newContestGrades.findIndex(
+      (find) => find.id === refId
+    );
+    const newContestGrade = {
+      ...newContestGrades[findGradeIndex],
+      isActive: true,
+    };
+    newContestGrades.splice(findGradeIndex, 1, newContestGrade);
     setContestGrades([...newContestGrades]);
   };
 
@@ -370,6 +387,14 @@ const ManualContestOrders = () => {
           parentState={setContestCategorys}
         />
       </Modal>
+      <Modal open={editModal.grade} onClose={editModal.grade}>
+        <ManualGradeEdit
+          payload={editIds}
+          close={setEditModal}
+          closeType={editModal}
+          parentState={setContestCategorys}
+        />
+      </Modal>
       <div className="w-1/4 h-full flex flex-col gap-y-2 py-2">
         <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg gap-x-2">
           <button
@@ -487,9 +512,16 @@ const ManualContestOrders = () => {
                         <td className="w-1/4 h-10 flex justify-start items-center ">
                           {category.categoryIndex}
                         </td>
-                        <td className="w-2/4 h-10 flex justify-start items-center ">
+                        <td
+                          className={`${
+                            category?.isActive
+                              ? " "
+                              : " line-through text-green-400"
+                          } " w-2/4 h-10 flex justify-start items-center "`}
+                        >
                           {category.contestCategoryTitle}
                         </td>
+
                         <td className="w-1/4 h-10 flex justify-start items-center gap-x-2">
                           <button
                             className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
@@ -504,14 +536,25 @@ const ManualContestOrders = () => {
                           >
                             <TiEdit className="text-2xl text-gray-300" />
                           </button>{" "}
-                          <button
-                            className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
-                            onClick={() => {
-                              handleDeleteCategoryInfo(category.id);
-                            }}
-                          >
-                            <TiTrash className="text-2xl text-gray-300" />
-                          </button>
+                          {category?.isActive ? (
+                            <button
+                              className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                              onClick={() => {
+                                handleDeleteCategoryInfo(category.id);
+                              }}
+                            >
+                              <TiTrash className="text-2xl text-gray-300" />
+                            </button>
+                          ) : (
+                            <button
+                              className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                              onClick={() => {
+                                handleUnDeleteCategoryInfo(category.id);
+                              }}
+                            >
+                              <TiArrowBack className="text-2xl text-gray-300" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -560,12 +603,13 @@ const ManualContestOrders = () => {
             <div className="flex w-full bg-green-500 outline-none h-full px-4 rounded-lg">
               <table className="w-full">
                 <th className="text-sm font-normal w-full flex border-b border-green-300 h-10">
-                  <td className="w-1/3 h-10 flex justify-start items-center ">
+                  <td className="w-1/4 h-10 flex justify-start items-center ">
                     개최순서
                   </td>
-                  <td className="w-2/3 h-10 flex justify-start items-center ">
+                  <td className="w-2/4 h-10 flex justify-start items-center ">
                     체급명
                   </td>
+                  <td className="w-1/4 h-10 flex justify-start items-center "></td>
                 </th>
                 {filteredGrades.filtered?.length &&
                   filteredGrades.filtered
@@ -575,11 +619,44 @@ const ManualContestOrders = () => {
                         className="text-sm font-normal w-full flex border-b border-green-400 h-10"
                         onClick={() => setCurrentGradeInfo(grade)}
                       >
-                        <td className="w-1/3 h-10 flex justify-start items-center ">
+                        <td className="w-1/4 h-10 flex justify-start items-center ">
                           {grade.gradeIndex}
                         </td>
-                        <td className="w-2/3 h-10 flex justify-start items-center ">
+                        <td className="w-2/4 h-10 flex justify-start items-center ">
                           {grade.contestGradeTitle}
+                        </td>
+                        <td className="w-1/4 h-10 flex justify-start items-center gap-x-2">
+                          <button
+                            className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                            onClick={() => {
+                              setEditIds({
+                                ...editIds,
+                                gradeId: grade.id,
+                              });
+                              setEditModal({ ...editModal, grade: true });
+                            }}
+                          >
+                            <TiEdit className="text-2xl text-gray-300" />
+                          </button>{" "}
+                          {grade?.isActive ? (
+                            <button
+                              className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                              onClick={() => {
+                                handleDeleteGradeInfo(grade.id);
+                              }}
+                            >
+                              <TiTrash className="text-2xl text-gray-300" />
+                            </button>
+                          ) : (
+                            <button
+                              className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                              onClick={() => {
+                                handleUnDeleteGradeInfo(grade.id);
+                              }}
+                            >
+                              <TiArrowBack className="text-2xl text-gray-300" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

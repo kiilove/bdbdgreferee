@@ -12,6 +12,7 @@ const ManualWinnerReportV2 = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupedData, setGroupedData] = useState(null);
+  const [isRefresh, setIsRefresh] = useState(false);
   const [rankingTableKey, setRankingTableKey] = useState(null);
   const [getRankBoard, setGetRankBoard] = useState([]);
   const getDatas = useFirestoreQuery();
@@ -58,6 +59,10 @@ const ManualWinnerReportV2 = () => {
   useEffect(() => {
     fetchRankingboards();
   }, []);
+
+  useEffect(() => {
+    fetchRankingboards();
+  }, [isRefresh]);
 
   useEffect(() => {
     if (getRankBoard.length !== 0) {
@@ -266,6 +271,14 @@ const ManualWinnerReportV2 = () => {
             content={() => printRef.current}
             pageStyle="@page { size: A4; margin: 0; } @media print { body { -webkit-print-color-adjust: exact; } }"
           />
+          <button
+            className="w-40 h-14 bg-green-500 rounded-lg mb-5 ml-5"
+            onClick={() => {
+              setIsRefresh(!isRefresh);
+            }}
+          >
+            새로고침
+          </button>
         </div>
         <div
           className="flex w-full justify-center items-center bg-white p-5"

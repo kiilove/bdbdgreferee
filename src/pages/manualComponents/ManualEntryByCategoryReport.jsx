@@ -14,8 +14,9 @@ const ManualEntryByCategoryReport = () => {
   const contestOrders = manualRank.contestOrders;
   let playerDataByCategory = [];
   if (contestOrders) {
-    playerDataByCategory = contestOrders.contestCategorys.map(
-      (category, categoryIndex) => {
+    playerDataByCategory = contestOrders.contestCategorys
+      ?.filter((f) => f.isActive)
+      .map((category, categoryIndex) => {
         const { id, contestCategoryTitle, categorySection } = category;
 
         const matchingGrades = contestOrders.contestGrades
@@ -39,8 +40,7 @@ const ManualEntryByCategoryReport = () => {
           categorySection,
           categoryIndex,
         };
-      }
-    );
+      });
 
     playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
   }
@@ -121,7 +121,7 @@ const ManualEntryByCategoryReport = () => {
           </button>
           <button
             className={
-              selectedSection === 3
+              selectedSection === 4
                 ? "bg-green-500 flex p-2  rounded-md"
                 : "bg-green-200 flex p-2  rounded-md"
             }
@@ -200,7 +200,7 @@ const ManualEntryByCategoryReport = () => {
                     filteredData.map((category, cIdx) => {
                       return (
                         <div className="flex flex-col w-full mb-10">
-                          {category.matchingGrades.length &&
+                          {category.matchingGrades.length > 0 &&
                             category.matchingGrades.map((matching, mIdx) => {
                               if (matching.players?.length > 0) {
                                 return (
@@ -232,7 +232,7 @@ const ManualEntryByCategoryReport = () => {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {matching.players?.length &&
+                                        {matching.players?.length > 0 &&
                                           matching.players.map(
                                             (player, pIdx) => (
                                               <tr className="h-10">

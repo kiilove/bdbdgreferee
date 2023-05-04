@@ -11,6 +11,7 @@ const ManualPlayerEdit = ({ payload, close, closeType, parentState }) => {
   const { manualRank, setManualRank } = useContext(ManualRankContext);
   const updatePlayerData = useFirestoreUpdateData("manual_rank_base");
 
+  console.log(payload);
   const enableGradeChange = (refGradeId) => {
     let nextGradeId = "";
     let nextPlayerIndex = 1;
@@ -26,6 +27,12 @@ const ManualPlayerEdit = ({ payload, close, closeType, parentState }) => {
           s.gradeIndex === currentGradeIndex + 1 &&
           s.refCategoryId === currentCategoryId
       );
+      const enableGradeChange2 = newContestGrades.filter(
+        (s) =>
+          s.gradeIndex === currentGradeIndex + 1 &&
+          s.refCategoryId === currentCategoryId
+      );
+      console.log(enableGradeChange2);
       if (enableGradeChange) {
         const nextContestGrades = newContestGrades.filter(
           (c) =>

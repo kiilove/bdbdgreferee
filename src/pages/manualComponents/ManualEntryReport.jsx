@@ -7,12 +7,17 @@ const ManualEntryReport = () => {
   const { manualRank } = useContext(ManualRankContext);
   const printRef = useRef();
   const contestOrders = manualRank.contestOrders;
+
   let playerDataByCategory = [];
   if (contestOrders) {
-    playerDataByCategory = contestOrders.contestCategorys.map(
-      (category, categoryIndex) => {
-        const { id, contestCategoryTitle } = category;
-        console.log(id);
+    playerDataByCategory = contestOrders.contestCategorys
+      ?.filter((f) => f.isActive)
+      .map((category, categoryIndex) => {
+        const {
+          id,
+          contestCategoryTitle,
+          isActive: categoryIsActive,
+        } = category;
 
         const matchingGrades = contestOrders.contestGrades
           .filter((grade) => grade.refCategoryId === id)
@@ -34,9 +39,9 @@ const ManualEntryReport = () => {
           contestCategoryTitle,
           matchingGrades,
           categoryIndex,
+          categoryIsActive,
         };
-      }
-    );
+      });
 
     playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
     console.log("playerDataByCategory", playerDataByCategory);
@@ -90,13 +95,13 @@ const ManualEntryReport = () => {
               </div>
               <div className="flex w-full justify-center">
                 <div className="flex flex-col w-full">
-                  {playerDataByCategory?.length &&
+                  {playerDataByCategory?.length > 0 &&
                     playerDataByCategory
                       .sort((a, b) => a.categoryIndex - b.categoryIndex)
                       .map((category, cIdx) => {
                         return (
                           <div className="flex flex-col w-full mb-10">
-                            {category.matchingGrades.length &&
+                            {category.matchingGrades.length > 0 &&
                               category.matchingGrades.map((matching, mIdx) => {
                                 if (matching.players?.length > 0) {
                                   return (
@@ -128,7 +133,7 @@ const ManualEntryReport = () => {
                                           </tr>
                                         </thead>
                                         <tbody>
-                                          {matching.players.length &&
+                                          {matching.players.length > 0 &&
                                             matching.players.map(
                                               (player, pIdx) => (
                                                 <tr className="h-10">
