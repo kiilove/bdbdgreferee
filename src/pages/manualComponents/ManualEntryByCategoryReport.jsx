@@ -119,6 +119,19 @@ const ManualEntryByCategoryReport = () => {
           >
             3부전체
           </button>
+          <button
+            className={
+              selectedSection === 3
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(4);
+              setSelectedCategory("");
+            }}
+          >
+            4부전체
+          </button>
         </div>
         <div className="flex justify-start items-center gap-2 mb-5 flex-wrap">
           {contestOrders?.contestCategorys &&
