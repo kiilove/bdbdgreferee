@@ -53,7 +53,7 @@ const ManualTotalReport = () => {
       return acc;
     }, {});
     setGroupedData(groupData);
-    console.log(groupedData);
+    console.log(groupData);
   };
 
   const fetchRankingboards = async () => {
@@ -62,12 +62,16 @@ const ManualTotalReport = () => {
       orderBy("refGameIndex"),
       orderBy("refClassIndex"),
     ];
-    const fetchedDatas = await getDatas.getDocuments(
-      manualRank.contestInfo.contestCollectionName,
-      conditions
-    );
-    console.log(fetchedDatas);
-    setGetRankBoard([...fetchedDatas]);
+    try {
+      const fetchedDatas = await getDatas.getDocuments(
+        manualRank.contestInfo.contestCollectionName,
+        conditions
+      );
+
+      setGetRankBoard([...fetchedDatas]);
+    } catch (error) {
+      console.log(error);
+    }
   };
   useEffect(() => {
     fetchRankingboards();
@@ -75,7 +79,6 @@ const ManualTotalReport = () => {
 
   useEffect(() => {
     if (getRankBoard.length !== 0) {
-      console.log(getRankBoard);
       gamesGroup(getRankBoard);
       setIsLoading(false);
     }
@@ -180,14 +183,7 @@ const ManualTotalReport = () => {
     const pageCount = getPageCount(content);
     const currentPage = getCurrentPage(content);
     const footer = document.createElement("div");
-    // footer.classList.add("footer");
-    // footer.textContent = `Page ${currentPage + 1} of ${pageCount}`;
-    // content.appendChild(footer);
   };
-
-  useEffect(() => {
-    console.log(groupedData);
-  }, [groupedData]);
 
   const RankingTable = React.forwardRef(({ header, data }, ref) => {
     function sortPlayersByScore(players) {

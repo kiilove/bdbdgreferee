@@ -50,12 +50,16 @@ const ManualRankingReportV2 = () => {
       orderBy("refGameIndex"),
       orderBy("refClassIndex"),
     ];
-    const fetchedDatas = await getDatas.getDocuments(
-      manualRank.contestInfo.contestCollectionName,
-      conditions
-    );
-    console.log(fetchedDatas);
-    setGetRankBoard([...fetchedDatas]);
+    try {
+      const fetchedDatas = await getDatas.getDocuments(
+        manualRank.contestInfo.contestCollectionName,
+        conditions
+      );
+      console.log(fetchedDatas);
+      setGetRankBoard([...fetchedDatas]);
+    } catch (error) {
+      console.log(error);
+    }
   };
   useEffect(() => {
     fetchRankingboards();
