@@ -6,7 +6,7 @@ import { ManualRankContext } from "../../../context/ManualRankContext";
 import { useEffect } from "react";
 import { update } from "firebase/database";
 
-const ManualPlayerEdit = ({ payload, close, parentState }) => {
+const ManualPlayerEdit = ({ payload, close, closeType, parentState }) => {
   const [currentPlayerInfo, setCurrentPlayerInfo] = useState({});
   const { manualRank, setManualRank } = useContext(ManualRankContext);
   const updatePlayerData = useFirestoreUpdateData("manual_rank_base");
@@ -96,7 +96,7 @@ const ManualPlayerEdit = ({ payload, close, parentState }) => {
     });
 
     parentState([...updatedPlayers]);
-    close(false);
+    close({ ...closeType, player: false });
   };
 
   useEffect(() => {

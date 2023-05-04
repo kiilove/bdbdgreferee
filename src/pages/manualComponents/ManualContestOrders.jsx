@@ -9,9 +9,20 @@ import {
   useFirestoreUpdateData,
 } from "../../customHooks/useFirestores";
 import { useRef } from "react";
-import { TiEdit, TiTrash } from "react-icons/ti";
+import { TiEdit, TiTrash, TiArrowBack } from "react-icons/ti";
 import { Modal } from "@mui/material";
 import ManualPlayerEdit from "./modals/ManualPlayerEdit";
+import ManualCategoryEdit from "./modals/ManualCategoryEdit";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import { db } from "../../firebase";
 
 const ManualContestOrders = () => {
   const [contestCategorys, setContestCategorys] = useState([]);
@@ -21,13 +32,18 @@ const ManualContestOrders = () => {
   const [currentGradeInfo, setCurrentGradeInfo] = useState({});
   const [contestPlayers, setContestPlayers] = useState([]);
   const [currentPlayerInfo, setCurrentPlayerInfo] = useState({});
+  const [currentCategorySection, setCurrentCategorySection] = useState(0);
   const [contestOrders, setContestOrders] = useState({});
   const [message, setMessage] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isModalOpen3, setIsModalOpen3] = useState(false);
   const [isModalOpen4, setIsModalOpen4] = useState(false);
-  const [editModal, setEditModal] = useState(false);
+  const [editModal, setEditModal] = useState({
+    category: false,
+    grade: false,
+    player: false,
+  });
   const [editIds, setEditIds] = useState({
     categoryId: "",
     gradeId: "",
@@ -69,11 +85,12 @@ const ManualContestOrders = () => {
     if (newId === currentCategoryInfo.id) {
       newId = uuidv4();
     }
-    console.log(newId);
+
     const newCategoryInfo = {
       ...currentCategoryInfo,
       id: newId,
-      categoryIndex: contestCategorys.length + 1 || 1,
+      categoryIndex: filteredCategorys.count + 1 || 1,
+      categorySection: currentCategorySection || undefined,
     };
     console.log(newCategoryInfo);
     const newContestCategorys = [...contestCategorys, newCategoryInfo];
@@ -112,6 +129,7 @@ const ManualContestOrders = () => {
       ...currentPlayerInfo,
       refGradeId: refId,
       contestPlayerIndex: playerIndex,
+      isActive: true,
     };
 
     const newContestPlayers = [...contestPlayers, newPlayerInfo];
@@ -127,36 +145,34 @@ const ManualContestOrders = () => {
 
     playerNumberRef.current.focus();
   };
-
-  const handleUpdateCategoryInfo = (refId) => {
-    const newContestCategorys = [...contestCategorys];
-    const findCategoryIndex = newContestCategorys.findIndex(
-      (find) => find.id === refId
+  const deleteCategoryMatchingDocuments = async (refCupId, refGameId) => {
+    const manualRankingBoardRef = collection(
+      db,
+      manualRank.contestInfo.contestCollectionName
     );
-    newContestCategorys.splice(findCategoryIndex, 1, {
-      ...currentCategoryInfo,
+    const q = query(
+      manualRankingBoardRef,
+      where("refCupId", "==", refCupId),
+      where("refGameId", "==", refGameId)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(async (docSnapshot) => {
+      await deleteDoc(
+        doc(db, manualRank.contestInfo.contestCollectionName, docSnapshot.id)
+      );
     });
-    setContestCategorys([...newContestCategorys]);
   };
 
-  const handleDeleteCategoryInfo = (refId) => {
+  const handleDeleteCategoryInfo = async (refId) => {
+    await deleteCategoryMatchingDocuments(manualRank.id, refId);
     const newContestCategorys = [...contestCategorys];
     const findCategoryIndex = newContestCategorys.findIndex(
       (find) => find.id === refId
     );
     newContestCategorys.splice(findCategoryIndex, 1);
     setContestCategorys([...newContestCategorys]);
-  };
-
-  const handleUpdateGradeInfo = (refTitle) => {
-    const newContestGrades = [...contestGrades];
-    const findGradeIndex = newContestGrades.findIndex(
-      (find) => find.contestGradeTitle === refTitle
-    );
-    newContestGrades.splice(findGradeIndex, 1, {
-      ...currentGradeInfo,
-    });
-    setContestCategorys([...newContestGrades]);
   };
 
   const handleDeleteGradeInfo = (refTitle) => {
@@ -177,15 +193,22 @@ const ManualContestOrders = () => {
   };
 
   const handleUpdateManualContest = async () => {
-    const newManualRank = {
-      ...manualRank,
-      contestOrders: contestOrders,
-    };
+    if (contestOrders.contestCategorys) {
+      console.log(contestOrders);
+      const newManualRank = {
+        ...manualRank,
+        contestOrders: contestOrders,
+      };
 
-    console.log(newManualRank);
-    await contestUpdateData(manualRank.id, newManualRank);
-    setManualRank({ ...newManualRank });
-    setIsModalOpen4(false);
+      console.log(newManualRank);
+      await contestUpdateData(manualRank.id, newManualRank);
+      setManualRank({ ...newManualRank });
+      setIsModalOpen4(false);
+    } else {
+      alert(
+        "대회정보에 빈값을 저장하려합니다. 데이터 보호를 위해 실행되지 않습니다."
+      );
+    }
   };
 
   const handleDeletePlayers = (refId) => {
@@ -193,8 +216,26 @@ const ManualContestOrders = () => {
     const findIndexPlayers = newContestPlayers.findIndex(
       (player) => player.id === refId
     );
+    const newContestPlayer = {
+      ...newContestPlayers[findIndexPlayers],
+      isActive: false,
+    };
 
-    newContestPlayers.splice(findIndexPlayers, 1);
+    newContestPlayers.splice(findIndexPlayers, 1, newContestPlayer);
+    setContestPlayers([...newContestPlayers]);
+  };
+
+  const handleUnDeletePlayers = (refId) => {
+    const newContestPlayers = [...contestPlayers];
+    const findIndexPlayers = newContestPlayers.findIndex(
+      (player) => player.id === refId
+    );
+    const newContestPlayer = {
+      ...newContestPlayers[findIndexPlayers],
+      isActive: true,
+    };
+
+    newContestPlayers.splice(findIndexPlayers, 1, newContestPlayer);
     setContestPlayers([...newContestPlayers]);
   };
 
@@ -223,6 +264,29 @@ const ManualContestOrders = () => {
 
     setContestPlayers([...dummy]);
   };
+
+  const filteredCategorys = useMemo(() => {
+    let filtered = [];
+    let count = 0;
+    if (contestCategorys.length > 0) {
+      count = contestCategorys.length;
+      filtered = [...contestCategorys];
+      if (currentCategorySection !== 0) {
+        const newFiltered = [...filtered];
+        filtered = newFiltered.filter(
+          (category) => category.categorySection === currentCategorySection
+        );
+        filtered.sort((a, b) => a.categoryIndex - b.categoryIndex);
+      }
+    }
+    console.log(filtered);
+    return { filtered, count };
+  }, [
+    manualRank,
+    contestCategorys,
+    currentCategoryInfo.id,
+    currentCategorySection,
+  ]);
 
   const filteredGrades = useMemo(() => {
     let filtered = [];
@@ -258,7 +322,11 @@ const ManualContestOrders = () => {
     const newPlayers = [...contestPlayers];
 
     newPlayers
-      .filter((filter) => filter.refGradeId === currentGradeInfo.id)
+      .filter(
+        (filter) =>
+          filter.refGradeId === currentGradeInfo.id &&
+          (filter?.isActive === true || filter?.isActive === undefined)
+      )
       .map((player, pIdx) => {
         const index = newPlayers.findIndex(
           (p) => p.id === player.id && p.refGradeId === currentGradeInfo.id
@@ -286,66 +354,164 @@ const ManualContestOrders = () => {
 
   return (
     <div className="flex w-full gap-x-5">
-      <Modal open={editModal} onClose={editModal}>
+      <Modal open={editModal.player} onClose={editModal.player}>
         <ManualPlayerEdit
           payload={editIds.playerId}
           close={setEditModal}
+          closeType={editModal}
           parentState={setContestPlayers}
         />
       </Modal>
+      <Modal open={editModal.category} onClose={editModal.category}>
+        <ManualCategoryEdit
+          payload={editIds}
+          close={setEditModal}
+          closeType={editModal}
+          parentState={setContestCategorys}
+        />
+      </Modal>
       <div className="w-1/4 h-full flex flex-col gap-y-2 py-2">
-        <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
-          <div className="flex w-1/4 h-full justify-start items-center ml-5">
-            <span>종목명</span>
-          </div>
-          <div className="flex w-3/4 h-full justify-start items-center ">
-            <div className="flex w-full gap-x-2 ">
-              <input
-                type="text"
-                name="contestCategoryTitle"
-                className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
-                ref={categoryTitleRef}
-                value={currentCategoryInfo.contestCategoryTitle}
-                onChange={(e) => handleCategoryInfo(e)}
-              />
+        <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg gap-x-2">
+          <button
+            className={`${
+              currentCategorySection === 0
+                ? "flex justify-center items-center w-full h-8 px-5 bg-green-600 rounded-lg text-white"
+                : "flex justify-center items-center w-full h-8 px-5 bg-green-500 rounded-lg"
+            }`}
+            onClick={() => {
+              setCurrentCategorySection(0);
+            }}
+          >
+            전체
+          </button>
+          <button
+            className={`${
+              currentCategorySection === 1
+                ? "flex justify-center items-center w-full h-8 px-5 bg-green-600 rounded-lg text-white"
+                : "flex justify-center items-center w-full h-8 px-5 bg-green-500 rounded-lg"
+            }`}
+            onClick={() => {
+              setCurrentCategorySection(1);
+            }}
+          >
+            1부
+          </button>
+          <button
+            className={`${
+              currentCategorySection === 2
+                ? "flex justify-center items-center w-full h-8 px-5 bg-green-600 rounded-lg text-white"
+                : "flex justify-center items-center w-full h-8 px-5 bg-green-500 rounded-lg"
+            }`}
+            onClick={() => {
+              setCurrentCategorySection(2);
+            }}
+          >
+            2부
+          </button>
+          <button
+            className={`${
+              currentCategorySection === 3
+                ? "flex justify-center items-center w-full h-8 px-5 bg-green-600 rounded-lg text-white"
+                : "flex justify-center items-center w-full h-8 px-5 bg-green-500 rounded-lg"
+            }`}
+            onClick={() => {
+              setCurrentCategorySection(3);
+            }}
+          >
+            3부
+          </button>
+          <button
+            className={`${
+              currentCategorySection === 4
+                ? "flex justify-center items-center w-full h-8 px-5 bg-green-600 rounded-lg text-white"
+                : "flex justify-center items-center w-full h-8 px-5 bg-green-500 rounded-lg"
+            }`}
+            onClick={() => {
+              setCurrentCategorySection(4);
+            }}
+          >
+            4부
+          </button>
+        </div>
+        {currentCategorySection !== 0 && (
+          <div className="flex h-12 w-full justify-start items-center bg-green-400 p-3 rounded-lg">
+            <div className="flex w-1/4 h-full justify-start items-center ml-5 ">
+              <span>종목명</span>
+            </div>
+            <div className="flex w-3/4 h-full justify-start items-center ">
+              <div className="flex w-full gap-x-2 ">
+                <input
+                  type="text"
+                  name="contestCategoryTitle"
+                  className="w-full bg-green-500 outline-none h-10 px-4 rounded-lg"
+                  ref={categoryTitleRef}
+                  value={currentCategoryInfo.contestCategoryTitle}
+                  onChange={(e) => handleCategoryInfo(e)}
+                />
 
-              <button
-                className="w-24 h-10 rounded-lg flex justify-center items-center bg-blue-500 text-white"
-                onClick={() => {
-                  const id = uuidv4();
-                  handleAddCategoryInfo(id);
-                }}
-              >
-                종목추가
-              </button>
+                <button
+                  className="w-24 h-10 rounded-lg flex justify-center items-center bg-blue-500 text-white"
+                  onClick={() => {
+                    const id = uuidv4();
+                    handleAddCategoryInfo(id);
+                  }}
+                >
+                  종목추가
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
         <div className="flex h-full w-full justify-start items-start bg-green-400 p-3 rounded-lg">
           <div className="flex w-full h-full justify-start items-center ">
             <div className="flex w-full bg-green-500 outline-none h-full px-4 rounded-lg">
               <table className="w-full">
                 <th className="text-sm font-normal w-full flex border-b border-green-300 h-10">
-                  <td className="w-1/3 h-10 flex justify-start items-center ">
+                  <td className="w-1/4 h-10 flex justify-start items-center ">
                     개최순서
                   </td>
-                  <td className="w-2/3 h-10 flex justify-start items-center ">
+                  <td className="w-2/4 h-10 flex justify-start items-center ">
                     종목명
                   </td>
+                  <td className="w-1/4 h-10 flex justify-start items-center "></td>
                 </th>
-                {contestCategorys?.length &&
-                  contestCategorys
+                {filteredCategorys.filtered?.length &&
+                  filteredCategorys.filtered
                     .sort((a, b) => a.categoryIndex - b.categoryIndex)
                     .map((category, cIdx) => (
                       <tr
                         className="text-sm font-normal w-full flex border-b border-green-400 h-10"
                         onClick={() => setCurrentCategoryInfo({ ...category })}
                       >
-                        <td className="w-1/3 h-10 flex justify-start items-center ">
+                        <td className="w-1/4 h-10 flex justify-start items-center ">
                           {category.categoryIndex}
                         </td>
-                        <td className="w-2/3 h-10 flex justify-start items-center ">
+                        <td className="w-2/4 h-10 flex justify-start items-center ">
                           {category.contestCategoryTitle}
+                        </td>
+                        <td className="w-1/4 h-10 flex justify-start items-center gap-x-2">
+                          <button
+                            className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                            onClick={() => {
+                              setEditIds({
+                                ...editIds,
+                                categoryId: category.id,
+                                categorySection: currentCategorySection,
+                              });
+                              setEditModal({ ...editModal, category: true });
+                            }}
+                          >
+                            <TiEdit className="text-2xl text-gray-300" />
+                          </button>{" "}
+                          <button
+                            className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                            onClick={() => {
+                              handleDeleteCategoryInfo(category.id);
+                            }}
+                          >
+                            <TiTrash className="text-2xl text-gray-300" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -564,16 +730,40 @@ const ManualContestOrders = () => {
                 {filteredPlayers.filtered?.length &&
                   filteredPlayers.filtered.map((player, pIdx) => (
                     <tr className="text-sm font-normal w-full flex border-b border-green-400 h-10">
-                      <td className="w-1/6 h-10 flex justify-start items-center ">
-                        {player.contestPlayerIndex}
+                      <td
+                        className={`${
+                          player?.isActive
+                            ? " "
+                            : " line-through text-green-400"
+                        } " w-1/6 h-10 flex justify-start items-center "`}
+                      >
+                        {player?.isActive && player.contestPlayerIndex}
                       </td>
-                      <td className="w-1/6 h-10 flex justify-start items-center ">
+                      <td
+                        className={`${
+                          player?.isActive
+                            ? " "
+                            : " line-through text-green-400"
+                        } " w-1/6 h-10 flex justify-start items-center "`}
+                      >
                         {player.contestPlayerNumber}
                       </td>
-                      <td className="w-2/6 h-10 flex justify-start items-center ">
+                      <td
+                        className={`${
+                          player?.isActive
+                            ? " "
+                            : " line-through text-green-400"
+                        } " w-2/6 h-10 flex justify-start items-center "`}
+                      >
                         {player.contestPlayerName}
                       </td>
-                      <td className="w-3/6 h-10 flex justify-start items-center ">
+                      <td
+                        className={`${
+                          player?.isActive
+                            ? " "
+                            : " line-through text-green-400"
+                        } " w-3/6 h-10 flex justify-start items-center "`}
+                      >
                         {player.contestPlayerGym}
                       </td>
                       <td className="w-1/6 h-10 flex justify-start items-center gap-x-3">
@@ -581,19 +771,30 @@ const ManualContestOrders = () => {
                           className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
                           onClick={() => {
                             setEditIds({ ...editIds, playerId: player.id });
-                            setEditModal(true);
+                            setEditModal({ ...editModal, player: true });
                           }}
                         >
                           <TiEdit className="text-2xl text-gray-300" />
                         </button>{" "}
-                        <button
-                          className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
-                          onClick={() => {
-                            handleDeletePlayers(player.id);
-                          }}
-                        >
-                          <TiTrash className="text-2xl text-gray-300" />
-                        </button>
+                        {player?.isActive ? (
+                          <button
+                            className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                            onClick={() => {
+                              handleDeletePlayers(player.id);
+                            }}
+                          >
+                            <TiTrash className="text-2xl text-gray-300" />
+                          </button>
+                        ) : (
+                          <button
+                            className="bg-green-700 w-8 h-8 flex justify-center items-center rounded-lg"
+                            onClick={() => {
+                              handleUnDeletePlayers(player.id);
+                            }}
+                          >
+                            <TiArrowBack className="text-2xl text-gray-300" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -632,14 +833,23 @@ const ManualContestOrders = () => {
               handleUpdateOrders();
             }}
           >
-            우선저장(1)
+            안전저장(1)
           </button>
-          <button
-            className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
-            onClick={() => handleUpdateManualContest()}
-          >
-            대회업데이트(2)
-          </button>
+          {contestOrders.contestCategorys ? (
+            <button
+              className="w-32 h-12 rounded-lg flex justify-center items-center bg-green-600 text-white"
+              onClick={() => handleUpdateManualContest()}
+            >
+              대회업데이트(2)
+            </button>
+          ) : (
+            <button
+              className="w-32 h-12 rounded-lg flex justify-center items-center bg-gray-600 text-white"
+              disabled
+            >
+              안전저장부터
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -8,50 +8,69 @@ import { useEffect } from "react";
 const ManualEntryByCategoryReport = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState();
+  const [selectedSection, setSelectedSection] = useState(1);
   const { manualRank } = useContext(ManualRankContext);
   const printRef = useRef();
   const contestOrders = manualRank.contestOrders;
-  console.log(contestOrders);
+  let playerDataByCategory = [];
+  if (contestOrders) {
+    playerDataByCategory = contestOrders.contestCategorys.map(
+      (category, categoryIndex) => {
+        const { id, contestCategoryTitle, categorySection } = category;
 
-  const playerDataByCategory = contestOrders.contestCategorys.map(
-    (category, categoryIndex) => {
-      const { id, contestCategoryTitle } = category;
-      console.log(id);
+        const matchingGrades = contestOrders.contestGrades
+          .filter((grade) => grade.refCategoryId === id)
+          .sort((a, b) => a.gradeIndex - b.gradeIndex);
 
-      const matchingGrades = contestOrders.contestGrades
-        .filter((grade) => grade.refCategoryId === id)
-        .sort((a, b) => a.gradeIndex - b.gradeIndex);
+        matchingGrades.forEach((grade) => {
+          grade.contestGradeTitle = grade.contestGradeTitle || grade.gradeTitle;
+          grade.players = contestOrders.contestPlayers
+            .filter(
+              (player) =>
+                player.refGradeId === grade.id &&
+                (player?.isActive === true || player?.isActive === undefined)
+            )
+            .sort((a, b) => a.contestPlayerIndex - b.contestPlayerIndex);
+        });
 
-      matchingGrades.forEach((grade) => {
-        grade.contestGradeTitle = grade.contestGradeTitle || grade.gradeTitle;
-        grade.players = contestOrders.contestPlayers
-          .filter((player) => player.refGradeId === grade.id)
-          .sort((a, b) => a.playerIndex - b.playerIndex);
-      });
-      console.log("체급", matchingGrades);
+        return {
+          contestCategoryTitle,
+          matchingGrades,
+          categorySection,
+          categoryIndex,
+        };
+      }
+    );
 
-      return {
-        contestCategoryTitle,
-        matchingGrades,
-        categoryIndex,
-      };
-    }
-  );
-
-  playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
-  console.log("playerDataByCategory", playerDataByCategory);
+    playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
+  }
 
   useEffect(() => {
     setFilteredData([...playerDataByCategory]);
   }, []);
 
   useEffect(() => {
-    const newFilteredData = playerDataByCategory.filter(
-      (filter) => filter.contestCategoryTitle === selectedCategory
-    );
-    console.log(newFilteredData);
-    setFilteredData([...newFilteredData]);
+    if (selectedCategory !== "") {
+      const newFilteredData = playerDataByCategory.filter(
+        (filter) => filter.contestCategoryTitle === selectedCategory
+      );
+
+      setFilteredData([...newFilteredData]);
+    }
   }, [selectedCategory]);
+
+  useEffect(() => {
+    console.log(selectedSection);
+    if (selectedSection !== 0 && selectedSection <= 4) {
+      const newFilteredData = playerDataByCategory.filter(
+        (filter) => filter.categorySection === selectedSection
+      );
+      console.log(playerDataByCategory);
+      console.log(newFilteredData);
+
+      setFilteredData([...newFilteredData]);
+    }
+  }, [selectedSection]);
 
   useEffect(() => {
     console.log(filteredData);
@@ -60,8 +79,49 @@ const ManualEntryByCategoryReport = () => {
   return (
     <div className="flex w-full flex-col justify-start h-full items-center px-5 py-2">
       <div className="flex w-full gap-x-5 flex-col">
-        <div className="flex justify-center items-center gap-2 mb-5 flex-wrap">
-          {contestOrders.contestCategorys &&
+        <div className="flex justify-start items-center gap-2 mb-5 flex-wrap">
+          <button
+            className={
+              selectedSection === 1
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(1);
+              setSelectedCategory("");
+            }}
+          >
+            1부전체
+          </button>
+          <button
+            className={
+              selectedSection === 2
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(2);
+              setSelectedCategory("");
+            }}
+          >
+            2부전체
+          </button>
+          <button
+            className={
+              selectedSection === 3
+                ? "bg-green-500 flex p-2  rounded-md"
+                : "bg-green-200 flex p-2  rounded-md"
+            }
+            onClick={() => {
+              setSelectedSection(3);
+              setSelectedCategory("");
+            }}
+          >
+            3부전체
+          </button>
+        </div>
+        <div className="flex justify-start items-center gap-2 mb-5 flex-wrap">
+          {contestOrders?.contestCategorys &&
             contestOrders.contestCategorys.map((category, cIdx) => (
               <button
                 className={
@@ -69,9 +129,10 @@ const ManualEntryByCategoryReport = () => {
                     ? "bg-green-500 flex p-2  rounded-md"
                     : "bg-green-200 flex p-2  rounded-md"
                 }
-                onClick={() =>
-                  setSelectedCategory(category.contestCategoryTitle)
-                }
+                onClick={() => {
+                  setSelectedCategory(category.contestCategoryTitle);
+                  setSelectedSection(0);
+                }}
               >
                 {category.contestCategoryTitle}
               </button>

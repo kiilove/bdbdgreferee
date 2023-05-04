@@ -36,8 +36,10 @@ const ManualRankingBase = () => {
 
   const groupByGradeId = (players, contestGrades, contestCategorys) => {
     const grouped = [];
-
-    players.forEach((player) => {
+    const filteredPlayers = players.filter(
+      (p) => p.isActive === true || p.isActive === undefined
+    );
+    filteredPlayers.forEach((player) => {
       let groupData = grouped.find(
         (group) => group.refGradeId === player.refGradeId
       );
@@ -71,13 +73,13 @@ const ManualRankingBase = () => {
 
       groupData.players.push(player);
     });
-    grouped.sort((a, b) => a.categoruIndex - b.categoruIndex);
+    grouped.sort((a, b) => a.categoryIndex - b.categoryIndex);
     setGroupedGradeId(grouped);
     return grouped;
   };
 
   useEffect(() => {
-    if (manualRank.contestOrders.contestPlayers?.length) {
+    if (manualRank.contestOrders?.contestPlayers?.length) {
       const getPlayers = [...manualRank.contestOrders.contestPlayers];
       const getGrades = [...manualRank.contestOrders.contestGrades];
       const getCategorys = [...manualRank.contestOrders.contestCategorys];

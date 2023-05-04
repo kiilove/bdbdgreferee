@@ -7,36 +7,40 @@ const ManualEntryReport = () => {
   const { manualRank } = useContext(ManualRankContext);
   const printRef = useRef();
   const contestOrders = manualRank.contestOrders;
-  console.log(contestOrders);
+  let playerDataByCategory = [];
+  if (contestOrders) {
+    playerDataByCategory = contestOrders.contestCategorys.map(
+      (category, categoryIndex) => {
+        const { id, contestCategoryTitle } = category;
+        console.log(id);
 
-  const playerDataByCategory = contestOrders.contestCategorys.map(
-    (category) => {
-      const { id, contestCategoryTitle, categoryIndex } = category;
-      console.log(id);
+        const matchingGrades = contestOrders.contestGrades
+          .filter((grade) => grade.refCategoryId === id)
+          .sort((a, b) => a.gradeIndex - b.gradeIndex);
 
-      const matchingGrades = contestOrders.contestGrades
-        .filter((grade) => grade.refCategoryId === id)
-        .sort((a, b) => a.gradeIndex - b.gradeIndex);
+        matchingGrades.forEach((grade) => {
+          grade.contestGradeTitle = grade.contestGradeTitle || grade.gradeTitle;
+          grade.players = contestOrders.contestPlayers
+            .filter(
+              (player) =>
+                player.refGradeId === grade.id &&
+                (player?.isActive === true || player?.isActive === undefined)
+            )
+            .sort((a, b) => a.contestPlayerIndex - b.contestPlayerIndex);
+        });
+        console.log("체급", matchingGrades);
 
-      matchingGrades.forEach((grade) => {
-        grade.contestGradeTitle = grade.contestGradeTitle || grade.gradeTitle;
-        grade.players = contestOrders.contestPlayers
-          .filter((player) => player.refGradeId === grade.id)
-          .sort((a, b) => a.playerIndex - b.playerIndex);
-      });
-      console.log("체급", matchingGrades);
+        return {
+          contestCategoryTitle,
+          matchingGrades,
+          categoryIndex,
+        };
+      }
+    );
 
-      return {
-        contestCategoryTitle,
-        matchingGrades,
-        categoryIndex,
-      };
-    }
-  );
-
-  playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
-  console.log("playerDataByCategory", playerDataByCategory);
-
+    playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
+    console.log("playerDataByCategory", playerDataByCategory);
+  }
   return (
     <div className="flex w-full flex-col justify-start h-full items-center px-5 py-2">
       <div className="flex w-full gap-x-5 flex-col">

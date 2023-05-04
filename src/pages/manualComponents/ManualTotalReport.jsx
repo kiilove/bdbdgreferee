@@ -87,6 +87,7 @@ const ManualTotalReport = () => {
         playerNumber,
         playerName,
         playerIndex,
+        isActive,
         playerGym = "",
         refSeatIndex,
         playerRank,
@@ -96,6 +97,7 @@ const ManualTotalReport = () => {
           playerNumber,
           playerName,
           playerIndex,
+          isActive,
           playerGym,
           rank: [],
           sumScore: 0,
@@ -240,7 +242,9 @@ const ManualTotalReport = () => {
           <tbody>
             {sortedPlayers?.length > 0 &&
               sortedPlayers.map((player, pIdx) => {
-                const shouldRender = player.sumScore < 100;
+                const shouldRender =
+                  player.sumScore < 100 &&
+                  (player?.isActive || player?.isActive === undefined);
                 return shouldRender ? (
                   <tr className="table-row-wrapper border-b border-gray-400">
                     <td className="w-20 h-12 text-center font-semibold border border-gray-500">

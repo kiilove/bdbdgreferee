@@ -11,35 +11,36 @@ const ManualScaleHeightByCategoryReport = () => {
   const { manualRank } = useContext(ManualRankContext);
   const printRef = useRef();
   const contestOrders = manualRank.contestOrders;
-  console.log(contestOrders);
+  let playerDataByCategory = [];
+  if (contestOrders) {
+    playerDataByCategory = contestOrders?.contestCategorys.map(
+      (category, categoryIndex) => {
+        const { id, contestCategoryTitle } = category;
+        console.log(id);
 
-  const playerDataByCategory = contestOrders.contestCategorys.map(
-    (category, categoryIndex) => {
-      const { id, contestCategoryTitle } = category;
-      console.log(id);
+        const matchingGrades = contestOrders.contestGrades
+          .filter((grade) => grade.refCategoryId === id)
+          .sort((a, b) => a.gradeIndex - b.gradeIndex);
 
-      const matchingGrades = contestOrders.contestGrades
-        .filter((grade) => grade.refCategoryId === id)
-        .sort((a, b) => a.gradeIndex - b.gradeIndex);
+        matchingGrades.forEach((grade) => {
+          grade.contestGradeTitle = grade.contestGradeTitle || grade.gradeTitle;
+          grade.players = contestOrders.contestPlayers
+            .filter((player) => player.refGradeId === grade.id)
+            .sort((a, b) => a.contestPlayerIndex - b.contestPlayerIndex);
+        });
+        console.log("체급", matchingGrades);
 
-      matchingGrades.forEach((grade) => {
-        grade.contestGradeTitle = grade.contestGradeTitle || grade.gradeTitle;
-        grade.players = contestOrders.contestPlayers
-          .filter((player) => player.refGradeId === grade.id)
-          .sort((a, b) => a.playerIndex - b.playerIndex);
-      });
-      console.log("체급", matchingGrades);
+        return {
+          contestCategoryTitle,
+          matchingGrades,
+          categoryIndex,
+        };
+      }
+    );
 
-      return {
-        contestCategoryTitle,
-        matchingGrades,
-        categoryIndex,
-      };
-    }
-  );
-
-  playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
-  console.log("playerDataByCategory", playerDataByCategory);
+    playerDataByCategory.sort((a, b) => a.categoryIndex - b.categoryIndex);
+    console.log("playerDataByCategory", playerDataByCategory);
+  }
 
   useEffect(() => {
     setFilteredData([...playerDataByCategory]);
@@ -63,7 +64,7 @@ const ManualScaleHeightByCategoryReport = () => {
       <div className="flex w-full gap-x-5 flex-col">
         <div className="flex justify-center items-center gap-2 mb-5 flex-wrap">
           <button onClick={() => setSelectedCategory("통합")}>통합</button>
-          {contestOrders.contestCategorys &&
+          {contestOrders?.contestCategorys &&
             contestOrders.contestCategorys.map((category, cIdx) => (
               <button
                 className={
