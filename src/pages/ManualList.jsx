@@ -22,7 +22,10 @@ const ManualList = () => {
 
   const fetchContests = async () => {
     const result = await getContests.getDocuments("manual_rank_base");
-    setContestList([...result]);
+
+    const newResult = result.filter((f) => f.contestStatus === "ing");
+
+    setContestList([...newResult]);
   };
 
   const handleAddContest = async () => {
