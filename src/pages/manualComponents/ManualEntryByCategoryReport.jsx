@@ -16,8 +16,9 @@ const ManualEntryByCategoryReport = () => {
   if (contestOrders) {
     playerDataByCategory = contestOrders.contestCategorys
       ?.filter((f) => f.isActive)
-      .map((category, categoryIndex) => {
-        const { id, contestCategoryTitle, categorySection } = category;
+      .map((category, cIdx) => {
+        const { id, contestCategoryTitle, categorySection, categoryIndex } =
+          category;
 
         const matchingGrades = contestOrders.contestGrades
           .filter((grade) => grade.refCategoryId === id)

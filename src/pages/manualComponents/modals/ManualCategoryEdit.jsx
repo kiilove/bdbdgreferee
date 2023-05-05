@@ -12,7 +12,10 @@ const ManualCategoryEdit = ({ payload, close, closeType, parentState }) => {
   const updatePlayerData = useFirestoreUpdateData("manual_rank_base");
 
   const handleCategoryInfo = (e) => {
-    if (e.target.name === "categorySection") {
+    if (
+      e.target.name === "categorySection" ||
+      e.target.name === "categoryIndex"
+    ) {
       setCurrentCategoryInfo({
         ...currentCategoryInfo,
         [e.target.name]: parseInt(e.target.value),

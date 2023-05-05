@@ -12,10 +12,11 @@ const ManualEntryReport = () => {
   if (contestOrders) {
     playerDataByCategory = contestOrders.contestCategorys
       ?.filter((f) => f.isActive)
-      .map((category, categoryIndex) => {
+      .map((category, cIdx) => {
         const {
           id,
           contestCategoryTitle,
+          categoryIndex,
           isActive: categoryIsActive,
         } = category;
 

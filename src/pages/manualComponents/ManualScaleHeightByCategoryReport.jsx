@@ -15,8 +15,9 @@ const ManualScaleHeightByCategoryReport = () => {
   let playerDataByCategory = [];
   if (contestOrders) {
     playerDataByCategory = contestOrders?.contestCategorys.map(
-      (category, categoryIndex) => {
-        const { id, contestCategoryTitle, categorySection } = category;
+      (category, cIdx) => {
+        const { id, contestCategoryTitle, categorySection, categoryIndex } =
+          category;
 
         const matchingGrades = contestOrders.contestGrades
           .filter((grade) => grade.refCategoryId === id)
